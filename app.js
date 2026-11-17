@@ -1,62 +1,10 @@
 /* ===================================================================
-   SHONEN STUDY HUB - APP LOGIC & ENGINE
+   SHONEN STUDY HUB - APP LOGIC & SUPABASE DATABASE ENGINE
    Themes: Dragon Ball, One Piece, Naruto, My Hero Academia, Multiverse
-   Features: Canvas Particles, Web Audio Synth, Local Storage,
-             Magic URL Sharing, JSON Backup, Pomodoro & Quests
+   Features: Supabase Auth (Login/Cadastro), Supabase DB Sync (Notas,
+             Missões, Treinos, Links, XP isolados por usuário),
+             Canvas Energy Particles, Web Audio Synth, Pomodoro & Sharing
    =================================================================== */
-
-// ================= APP STATE =================
-const STATE_KEY = 'SHONEN_STUDY_HUB_DATA_V1';
-
-const DEFAULT_STATE = {
-  theme: 'multiverse',
-  soundEnabled: true,
-  profile: {
-    name: 'Guerreiro do Conhecimento',
-    avatar: 'goku',
-    xp: 350,
-    level: 1,
-    streak: 3,
-    lastStudyDate: new Date().toISOString().split('T')[0]
-  },
-  notes: [
-    {
-      id: 'note-1',
-      title: 'Técnica Pomodoro na Sala do Tempo ⚡',
-      subject: 'Programação',
-      tags: ['produtividade', 'foco', 'estudos'],
-      body: `1. Escolha 1 única tarefa prioritária.\n2. Treine seu foco por 25 minutos sem interrupções.\n3. Descanse 5 minutos para recarregar o Ki/Chakra.\n4. A cada 4 ciclos, faça uma pausa longa de 15 minutos.\n\n"Supere seus limites aqui e agora!" — Yami Sukehiro`,
-      date: new Date().toLocaleDateString('pt-BR')
-    },
-    {
-      id: 'note-2',
-      title: 'Comandos Essenciais do Git & GitHub 🐙',
-      subject: 'Programação',
-      tags: ['git', 'github', 'dev'],
-      body: `• git init (iniciar repositório)\n• git add . (adicionar arquivos)\n• git commit -m "feat: meu estudo"\n• git branch -M main\n• git remote add origin <URL>\n• git push -u origin main\n\nPara ativar o GitHub Pages:\nSettings > Pages > Branch main > Save!`,
-      date: new Date().toLocaleDateString('pt-BR')
-    },
-    {
-      id: 'note-3',
-      title: 'Regra de Ouro dos Estudos: Efeito Espaçado 🧠',
-      subject: 'Ciências',
-      tags: ['memoria', 'revisao'],
-      body: `A curva do esquecimento de Ebbinghaus mostra que esquecemos 70% do que estudamos em 24h a menos que revisemos:\n• Revisão 1: 24 horas depois (10 min)\n• Revisão 2: 7 dias depois (5 min)\n• Revisão 3: 30 dias depois (3 min)`,
-      date: new Date().toLocaleDateString('pt-BR')
-    }
-  ],
-  tasks: [
-    { id: 'task-1', title: 'Completar 1 ciclo de foco na Sala do Tempo', difficulty: 'C', xp: 100, completed: false },
-    { id: 'task-2', title: 'Criar meu primeiro resumo no Grimório', difficulty: 'C', xp: 100, completed: true },
-    { id: 'task-3', title: 'Publicar o projeto no GitHub Pages', difficulty: 'S', xp: 500, completed: false }
-  ],
-  links: [
-    { id: 'link-1', title: 'MDN Web Docs (Guia Web)', url: 'https://developer.mozilla.org', category: 'doc' },
-    { id: 'link-2', title: 'GitHub (Repositórios & Portfólio)', url: 'https://github.com', category: 'tool' },
-    { id: 'link-3', title: 'YouTube Edu (Aulas & Cursos)', url: 'https://youtube.com', category: 'video' },
-    { id: 'link-4', title: 'Canva / Anotações Visuais', url: 'https://canva.com', category: 'tool' }
-  ]
-};
 
 // Shonen Quotes Collection
 const SHONEN_QUOTES = [
@@ -69,7 +17,7 @@ const SHONEN_QUOTES = [
   { text: "A cicatriz nas costas é a maior vergonha de um espadachim. Encare os desafios de frente!", author: "Roronoa Zoro (One Piece)" }
 ];
 
-// Audio Theme Synth
+// Audio Theme Synth (Native Web Audio API)
 class SoundFX {
   constructor() {
     this.ctx = null;
@@ -86,7 +34,7 @@ class SoundFX {
   }
 
   playClick() {
-    if (!app.state.soundEnabled) return;
+    if (app && !app.soundEnabled) return;
     this.init();
     if (!this.ctx) return;
     
@@ -106,7 +54,7 @@ class SoundFX {
   }
 
   playPowerUp() {
-    if (!app.state.soundEnabled) return;
+    if (app && !app.soundEnabled) return;
     this.init();
     if (!this.ctx) return;
 
@@ -126,7 +74,7 @@ class SoundFX {
   }
 
   playSuccess() {
-    if (!app.state.soundEnabled) return;
+    if (app && !app.soundEnabled) return;
     this.init();
     if (!this.ctx) return;
 
@@ -149,7 +97,7 @@ class SoundFX {
   }
 
   playGong() {
-    if (!app.state.soundEnabled) return;
+    if (app && !app.soundEnabled) return;
     this.init();
     if (!this.ctx) return;
 
@@ -169,7 +117,7 @@ class SoundFX {
   }
 }
 
-// Ambient Audio Synth (No external audio files needed!)
+// Ambient Audio Synth
 class AmbientAudioEngine {
   constructor() {
     this.ctx = null;
@@ -200,7 +148,6 @@ class AmbientAudioEngine {
     this.nodes.push(masterGain);
 
     if (mode === 'binaural') {
-      // Alpha waves: 216Hz & 226Hz (10Hz binaural beat difference)
       const oscL = this.ctx.createOscillator();
       const oscR = this.ctx.createOscillator();
       oscL.frequency.value = 216;
@@ -211,7 +158,6 @@ class AmbientAudioEngine {
       oscR.start();
       this.nodes.push(oscL, oscR);
     } else if (mode === 'cosmic') {
-      // Cosmic Ki drone (55Hz sub + modulated harmonics)
       const osc = this.ctx.createOscillator();
       osc.type = 'sawtooth';
       osc.frequency.value = 55;
@@ -223,7 +169,6 @@ class AmbientAudioEngine {
       osc.start();
       this.nodes.push(osc, filter);
     } else if (mode === 'rain') {
-      // Rain noise buffer simulation
       const bufferSize = this.ctx.sampleRate * 2;
       const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
@@ -253,7 +198,7 @@ class EnergyParticleCanvas {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext('2d');
     this.particles = [];
-    this.numParticles = 48;
+    this.numParticles = 46;
     this.mouse = { x: null, y: null };
     this.theme = 'multiverse';
 
@@ -294,29 +239,24 @@ class EnergyParticleCanvas {
 
     switch (this.theme) {
       case 'dragonball':
-        // Goku Ki: Rising golden aura & occasional 4-star dragon ball spark
         color = Math.random() > 0.3 ? 'rgba(251, 191, 36, 0.85)' : 'rgba(6, 182, 212, 0.85)';
-        speedY = -(Math.random() * 2.2 + 0.6); // Rising upwards
+        speedY = -(Math.random() * 2.2 + 0.6);
         speedX = (Math.random() - 0.5) * 0.9;
-        if (Math.random() > 0.8) shape = 'dragonball';
+        if (Math.random() > 0.85) shape = 'dragonball';
         break;
       case 'onepiece':
-        // Luffy Haki: Black/Red lightning sparks & white Joy Boy steam
         color = Math.random() > 0.4 ? 'rgba(239, 68, 68, 0.9)' : 'rgba(255, 255, 255, 0.75)';
         size = Math.random() * 4 + 1;
         break;
       case 'naruto':
-        // Naruto Sage/Kurama: Orange chakra & Rasengan blue spirals
         color = Math.random() > 0.35 ? 'rgba(249, 115, 22, 0.85)' : 'rgba(2, 132, 199, 0.85)';
         speedY = (Math.random() - 0.5) * 2;
         break;
       case 'mha':
-        // Deku OFA: Electric cyan/emerald lightning crackles
         color = Math.random() > 0.3 ? 'rgba(16, 185, 129, 0.9)' : 'rgba(6, 182, 212, 0.9)';
         shape = 'spark';
         break;
       default:
-        // Multiverse cosmic
         color = Math.random() > 0.5 ? 'rgba(139, 92, 246, 0.85)' : 'rgba(56, 189, 248, 0.85)';
     }
 
@@ -327,9 +267,7 @@ class EnergyParticleCanvas {
       speedX,
       speedY,
       color,
-      shape,
-      alpha: Math.random() * 0.6 + 0.3,
-      pulse: Math.random() * 0.05 + 0.01
+      shape
     };
   }
 
@@ -340,13 +278,11 @@ class EnergyParticleCanvas {
       p.x += p.speedX;
       p.y += p.speedY;
 
-      // Wrap around bounds
       if (p.x < 0) p.x = this.canvas.width;
       if (p.x > this.canvas.width) p.x = 0;
       if (p.y < 0) p.y = this.canvas.height;
       if (p.y > this.canvas.height) p.y = 0;
 
-      // Mouse repulsion/attraction
       if (this.mouse.x !== null) {
         let dx = this.mouse.x - p.x;
         let dy = this.mouse.y - p.y;
@@ -363,7 +299,6 @@ class EnergyParticleCanvas {
       this.ctx.shadowColor = p.color;
 
       if (p.shape === 'dragonball') {
-        // Mini Dragon Ball with star outline
         this.ctx.beginPath();
         this.ctx.arc(p.x, p.y, p.size * 1.5, 0, Math.PI * 2);
         this.ctx.fill();
@@ -372,7 +307,6 @@ class EnergyParticleCanvas {
         this.ctx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2);
         this.ctx.fill();
       } else if (p.shape === 'spark') {
-        // Deku Lightning spark line
         this.ctx.strokeStyle = p.color;
         this.ctx.lineWidth = 1.8;
         this.ctx.beginPath();
@@ -380,7 +314,6 @@ class EnergyParticleCanvas {
         this.ctx.lineTo(p.x + (Math.random() - 0.5) * 16, p.y + (Math.random() - 0.5) * 16);
         this.ctx.stroke();
       } else {
-        // Circular energy orb
         this.ctx.beginPath();
         this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         this.ctx.fill();
@@ -392,80 +325,331 @@ class EnergyParticleCanvas {
   }
 }
 
-// ================= MAIN APP CLASS =================
+// ================= MAIN SHONEN & SUPABASE APPLICATION =================
 class ShonenApp {
   constructor() {
-    this.state = this.loadState();
     this.sound = new SoundFX();
     this.ambient = new AmbientAudioEngine();
     this.canvasEngine = null;
+    this.soundEnabled = true;
 
-    // Pomodoro State
+    // Supabase State
+    this.supabase = null;
+    this.currentUser = null;
+    this.userProfile = {
+      name: 'Guerreiro Z',
+      avatar: 'goku',
+      xp: 350,
+      streak: 1,
+      theme: 'multiverse'
+    };
+
+    // Data in Memory (Synced with Supabase)
+    this.notes = [];
+    this.tasks = [];
+    this.links = [];
+    this.trainingsCount = 0;
+
+    // Auth screen state
+    this.authMode = 'login'; // 'login' or 'register'
+
+    // Pomodoro Timer State
     this.timerInterval = null;
-    this.timerTimeLeft = 25 * 60; // in seconds
+    this.timerTimeLeft = 25 * 60;
     this.timerTotal = 25 * 60;
     this.timerIsRunning = false;
-    this.timerMode = 'focus'; // focus, short, long
+    this.timerMode = 'focus';
 
-    // Task Filter state
+    // Filters
     this.taskFilter = 'pending';
   }
 
-  loadState() {
-    const saved = localStorage.getItem(STATE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return { ...DEFAULT_STATE, ...parsed };
-      } catch (e) {
-        console.error('Failed to parse saved state, using default.', e);
-      }
-    }
-    return JSON.parse(JSON.stringify(DEFAULT_STATE));
-  }
-
-  saveState() {
-    localStorage.setItem(STATE_KEY, JSON.stringify(this.state));
-  }
-
-  init() {
-    // 1. Check if URL contains shared study data (#share=... or #data=...)
-    this.checkUrlForSharedData();
-
-    // 2. Initialize Canvas & Background
+  async init() {
+    // 1. Start Particle Canvas
     this.canvasEngine = new EnergyParticleCanvas('energyCanvas');
-    this.applyTheme(this.state.theme, false);
 
-    // 3. Render Dashboard Elements
-    this.updateUserStatsDisplay();
-    this.renderDailyQuote();
-    this.renderNotes();
-    this.renderTasks();
-    this.renderLinks();
+    // 2. Init Supabase Connection
+    await this.initSupabase();
+
+    // 3. Setup Listeners
     this.setupEventListeners();
+    this.renderDailyQuote();
     this.updatePomodoroDisplay();
 
-    // 4. Welcome notification
-    setTimeout(() => {
-      this.showToast(`🔥 Bem-vindo ao Shonen Study Hub, ${this.state.profile.name}!`);
-    }, 500);
+    // 4. Check Magic URL Share Hash
+    this.checkUrlForSharedData();
+  }
+
+  // ================= SUPABASE CLIENT INITIALIZATION =================
+  async initSupabase() {
+    const config = window.SUPABASE_CONFIG || {};
+    const url = config.url?.trim();
+    const key = config.anonKey?.trim();
+
+    const pill = document.getElementById('dbStatusPill');
+    const statusText = document.getElementById('dbStatusText');
+
+    if (!url || !key || url.includes('SEU_PROJETO')) {
+      if (pill) {
+        pill.querySelector('.status-dot').className = 'status-dot offline';
+        statusText.textContent = 'Supabase: Chaves Pendentes';
+      }
+      this.showAuthAlert('Atenção: Configure a URL e a Chave Pública do seu Supabase no botão abaixo para conectar à sua base de dados.', 'error');
+      return false;
+    }
+
+    try {
+      if (!window.supabase) {
+        throw new Error('Biblioteca Supabase SDK não carregou.');
+      }
+
+      this.supabase = window.supabase.createClient(url, key);
+
+      // Check current session
+      const { data: { session }, error } = await this.supabase.auth.getSession();
+      
+      if (error) throw error;
+
+      if (pill) {
+        pill.querySelector('.status-dot').className = 'status-dot online';
+        statusText.textContent = 'Supabase Conectado!';
+      }
+
+      // Setup Auth state listener
+      this.supabase.auth.onAuthStateChange(async (event, currentSession) => {
+        if (currentSession && currentSession.user) {
+          this.currentUser = currentSession.user;
+          this.showDashboard();
+          await this.loadAllUserData();
+        } else {
+          this.currentUser = null;
+          this.showAuthScreen();
+        }
+      });
+
+      if (session && session.user) {
+        this.currentUser = session.user;
+        this.showDashboard();
+        await this.loadAllUserData();
+      } else {
+        this.showAuthScreen();
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Supabase init error:', err);
+      if (pill) {
+        pill.querySelector('.status-dot').className = 'status-dot offline';
+        statusText.textContent = 'Erro ao conectar ao Supabase';
+      }
+      this.showAuthAlert(`Erro na conexão com o Supabase: ${err.message}`, 'error');
+      return false;
+    }
+  }
+
+  // ================= AUTH UI TOGGLE =================
+  showAuthScreen() {
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('mainDashboard').style.display = 'none';
+  }
+
+  showDashboard() {
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('mainDashboard').style.display = 'flex';
+    const emailBadge = document.getElementById('userEmailBadgeFooter');
+    if (emailBadge && this.currentUser) {
+      emailBadge.textContent = `Autenticado: ${this.currentUser.email}`;
+    }
+  }
+
+  setAuthMode(mode) {
+    this.authMode = mode;
+    const loginTab = document.getElementById('tabLoginBtn');
+    const regTab = document.getElementById('tabRegisterBtn');
+    const nameGroup = document.getElementById('registerNameGroup');
+    const avatarGroup = document.getElementById('registerAvatarGroup');
+    const submitText = document.getElementById('authSubmitText');
+    const alertBox = document.getElementById('authAlert');
+
+    alertBox.style.display = 'none';
+
+    if (mode === 'login') {
+      loginTab.classList.add('active');
+      regTab.classList.remove('active');
+      nameGroup.style.display = 'none';
+      avatarGroup.style.display = 'none';
+      submitText.textContent = 'Entrar no Shonen Hub';
+    } else {
+      regTab.classList.add('active');
+      loginTab.classList.remove('active');
+      nameGroup.style.display = 'flex';
+      avatarGroup.style.display = 'flex';
+      submitText.textContent = 'Despertar Poder & Cadastrar';
+    }
+    this.sound.playClick();
+  }
+
+  showAuthAlert(message, type = 'error') {
+    const alertBox = document.getElementById('authAlert');
+    if (!alertBox) return;
+    alertBox.textContent = message;
+    alertBox.className = `auth-alert ${type}`;
+    alertBox.style.display = 'flex';
+  }
+
+  async handleAuthSubmit(e) {
+    e.preventDefault();
+    if (!this.supabase) {
+      this.openModal('dbConfigModal');
+      this.showAuthAlert('Configure a URL e a Anon Key do Supabase antes de fazer login.', 'error');
+      return;
+    }
+
+    const email = document.getElementById('authEmailInput').value.trim();
+    const password = document.getElementById('authPasswordInput').value;
+    const submitBtn = document.getElementById('authSubmitBtn');
+
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.6';
+
+    try {
+      if (this.authMode === 'login') {
+        const { data, error } = await this.supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        if (error) throw error;
+
+        this.sound.playPowerUp();
+        this.showToast('Login realizado com sucesso!');
+      } else {
+        // Register
+        const name = document.getElementById('authNameInput').value.trim() || 'Guerreiro Z';
+        const avatar = document.querySelector('input[name="authAvatarRadio"]:checked')?.value || 'goku';
+
+        const { data, error } = await this.supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name, avatar }
+          }
+        });
+        if (error) throw error;
+
+        this.sound.playSuccess();
+        this.showAuthAlert('Conta criada com sucesso! Se a confirmação de e-mail estiver ativa no Supabase, verifique sua caixa de entrada, ou faça login.', 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      let msg = err.message;
+      if (msg.includes('Invalid login credentials')) msg = 'E-mail ou senha incorretos.';
+      if (msg.includes('User already registered')) msg = 'Este e-mail já está cadastrado. Tente entrar.';
+      if (msg.includes('Password should be at least 6 characters')) msg = 'A senha deve possuir pelo menos 6 caracteres.';
+      this.showAuthAlert(msg, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+    }
+  }
+
+  async logout() {
+    if (!this.supabase) return;
+    if (confirm('Deseja realmente sair da sua conta?')) {
+      await this.supabase.auth.signOut();
+      this.sound.playClick();
+      this.showToast('Você saiu da sua conta.');
+    }
+  }
+
+  // ================= LOAD / SYNC DATA WITH SUPABASE =================
+  async loadAllUserData() {
+    if (!this.supabase || !this.currentUser) return;
+    const uid = this.currentUser.id;
+
+    try {
+      // 1. Profile & Stats
+      const { data: profile, error: pErr } = await this.supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', uid)
+        .maybeSingle();
+
+      if (profile) {
+        this.userProfile = profile;
+      } else {
+        // Create initial profile if trigger did not execute
+        const meta = this.currentUser.user_metadata || {};
+        const newProf = {
+          id: uid,
+          name: meta.name || 'Guerreiro Z',
+          avatar: meta.avatar || 'goku',
+          xp: 350,
+          streak: 1,
+          theme: 'multiverse'
+        };
+        await this.supabase.from('profiles').insert(newProf);
+        this.userProfile = newProf;
+      }
+
+      this.applyTheme(this.userProfile.theme || 'multiverse', false);
+      this.updateUserStatsDisplay();
+
+      // 2. Notes
+      const { data: notes } = await this.supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false });
+      
+      this.notes = notes || [];
+      this.renderNotes();
+
+      // 3. Tasks / Quests
+      const { data: tasks } = await this.supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false });
+
+      this.tasks = tasks || [];
+      this.renderTasks();
+
+      // 4. Links Vault
+      const { data: links } = await this.supabase
+        .from('links')
+        .select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false });
+
+      this.links = links || [];
+      this.renderLinks();
+
+      // 5. Training Sessions Count
+      const { count } = await this.supabase
+        .from('trainings')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', uid);
+
+      this.trainingsCount = count || 0;
+      const countEl = document.getElementById('trainingCountDisplay');
+      if (countEl) countEl.textContent = this.trainingsCount;
+
+      this.showToast(`🔥 Dados de ${this.userProfile.name} sincronizados do Supabase!`);
+    } catch (err) {
+      console.error('Error loading data from Supabase:', err);
+      this.showToast('Aviso: Verifique se executou o script supabase_schema.sql no Supabase.');
+    }
   }
 
   // ================= THEME & WALLPAPER =================
-  applyTheme(themeName, playSound = true) {
-    this.state.theme = themeName;
+  async applyTheme(themeName, syncDb = true) {
+    this.userProfile.theme = themeName;
     document.body.setAttribute('data-theme', themeName);
 
-    // Update active button state
     document.querySelectorAll('.theme-btn').forEach(btn => {
-      if (btn.dataset.themeTarget === themeName) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
+      btn.classList.toggle('active', btn.dataset.themeTarget === themeName);
     });
 
-    // Update Wallpaper background with stylized anime artwork
     const overlay = document.getElementById('wallpaperOverlay');
     const wallpapers = {
       multiverse: 'radial-gradient(circle at 50% 20%, #312e81 0%, #09090b 80%)',
@@ -474,28 +658,32 @@ class ShonenApp {
       naruto: 'radial-gradient(circle at 50% 30%, #7c2d12 0%, #150e09 70%)',
       mha: 'radial-gradient(circle at 50% 30%, #064e3b 0%, #051412 70%)'
     };
-
     overlay.style.background = wallpapers[themeName] || wallpapers.multiverse;
 
     if (this.canvasEngine) {
       this.canvasEngine.setTheme(themeName);
     }
 
-    if (playSound) {
+    if (syncDb && this.supabase && this.currentUser) {
       this.sound.playPowerUp();
+      await this.supabase.from('profiles').update({ theme: themeName }).eq('id', this.currentUser.id);
       this.showToast(`Universo ativado: ${themeName.toUpperCase()}!`);
     }
-
-    this.saveState();
   }
 
   // ================= STATS & XP =================
-  addXp(amount, reason = '') {
-    this.state.profile.xp += amount;
+  async addXp(amount, reason = '') {
+    this.userProfile.xp += amount;
     this.sound.playSuccess();
     this.showToast(`+${amount} XP ganho! ${reason}`);
     this.updateUserStatsDisplay();
-    this.saveState();
+
+    if (this.supabase && this.currentUser) {
+      await this.supabase
+        .from('profiles')
+        .update({ xp: this.userProfile.xp, updated_at: new Date().toISOString() })
+        .eq('id', this.currentUser.id);
+    }
   }
 
   getRankTitle(xp) {
@@ -507,7 +695,7 @@ class ShonenApp {
   }
 
   updateUserStatsDisplay() {
-    const p = this.state.profile;
+    const p = this.userProfile;
     const nameLabel = document.getElementById('userNameLabel');
     const powerDisplay = document.getElementById('powerLevelDisplay');
     const rankLabel = document.getElementById('currentRankLabel');
@@ -517,17 +705,17 @@ class ShonenApp {
     const avatarImg = document.getElementById('userAvatarImg');
     const streakDisplay = document.getElementById('studyStreakDisplay');
 
-    if (nameLabel) nameLabel.textContent = p.name;
-    if (powerDisplay) powerDisplay.textContent = `${(p.xp * 9 + 100).toLocaleString('pt-BR')}+`;
-    if (rankLabel) rankLabel.textContent = this.getRankTitle(p.xp);
-    if (streakDisplay) streakDisplay.textContent = `${p.streak} Dias`;
+    if (nameLabel) nameLabel.textContent = p.name || 'Guerreiro';
+    if (powerDisplay) powerDisplay.textContent = `${((p.xp || 0) * 9 + 100).toLocaleString('pt-BR')}+`;
+    if (rankLabel) rankLabel.textContent = this.getRankTitle(p.xp || 0);
+    if (streakDisplay) streakDisplay.textContent = `${p.streak || 1} Dia(s)`;
 
-    const level = Math.floor(p.xp / 500) + 1;
+    const level = Math.floor((p.xp || 0) / 500) + 1;
     const currentLevelBase = (level - 1) * 500;
     const nextLevelTarget = level * 500;
-    const progress = Math.min(100, Math.max(5, ((p.xp - currentLevelBase) / 500) * 100));
+    const progress = Math.min(100, Math.max(5, (((p.xp || 0) - currentLevelBase) / 500) * 100));
 
-    if (xpText) xpText.textContent = p.xp;
+    if (xpText) xpText.textContent = p.xp || 0;
     if (nextXpText) nextXpText.textContent = nextLevelTarget;
     if (progressBar) progressBar.style.width = `${progress}%`;
 
@@ -548,7 +736,7 @@ class ShonenApp {
     if (authorEl) authorEl.textContent = `— ${quote.author}`;
   }
 
-  // ================= NOTES ENGINE =================
+  // ================= NOTES (GRIMÓRIO) =================
   renderNotes() {
     const container = document.getElementById('notesGridContainer');
     if (!container) return;
@@ -556,7 +744,7 @@ class ShonenApp {
     const searchTerm = (document.getElementById('noteSearchInput')?.value || '').toLowerCase();
     const subjectFilter = document.getElementById('noteSubjectFilter')?.value || 'all';
 
-    const filtered = this.state.notes.filter(note => {
+    const filtered = this.notes.filter(note => {
       const matchSearch = note.title.toLowerCase().includes(searchTerm) ||
                           note.body.toLowerCase().includes(searchTerm) ||
                           (note.tags && note.tags.some(t => t.toLowerCase().includes(searchTerm)));
@@ -568,7 +756,7 @@ class ShonenApp {
       container.innerHTML = `
         <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
           <i class="fa-solid fa-scroll" style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4;"></i>
-          <p>Nenhuma anotação encontrada. Crie sua primeira nota clicando em <strong>Nova Nota</strong> acima!</p>
+          <p>Nenhuma anotação salva no seu banco. Clique em <strong>Nova Nota</strong> para adicionar!</p>
         </div>
       `;
       return;
@@ -595,11 +783,10 @@ class ShonenApp {
         <div class="note-tags">
           ${(note.tags || []).map(t => `<span class="note-tag">#${this.escapeHtml(t)}</span>`).join('')}
         </div>
-        <div class="note-date"><i class="fa-regular fa-clock"></i> ${note.date || 'Hoje'}</div>
+        <div class="note-date"><i class="fa-regular fa-clock"></i> ${new Date(note.created_at || Date.now()).toLocaleDateString('pt-BR')}</div>
       </div>
     `).join('');
 
-    // Attach 3D tilt interaction to each note
     this.setupNoteTilt();
   }
 
@@ -620,40 +807,59 @@ class ShonenApp {
     });
   }
 
-  saveNote(title, subject, tagsStr, body, editId = null) {
+  async saveNote(title, subject, tagsStr, body, editId = null) {
+    if (!this.currentUser || !this.supabase) return;
     const tags = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
 
-    if (editId) {
-      const idx = this.state.notes.findIndex(n => n.id === editId);
-      if (idx !== -1) {
-        this.state.notes[idx] = {
-          ...this.state.notes[idx],
+    try {
+      if (editId) {
+        const { error } = await this.supabase
+          .from('notes')
+          .update({
+            title,
+            subject,
+            tags,
+            body,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editId)
+          .eq('user_id', this.currentUser.id);
+
+        if (error) throw error;
+
+        const idx = this.notes.findIndex(n => n.id === editId);
+        if (idx !== -1) {
+          this.notes[idx] = { ...this.notes[idx], title, subject, tags, body };
+        }
+        this.showToast('Nota atualizada no Supabase!');
+      } else {
+        const newNote = {
+          id: 'note-' + Date.now(),
+          user_id: this.currentUser.id,
           title,
           subject,
           tags,
-          body
+          body,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         };
-        this.showToast('Nota atualizada com sucesso!');
-      }
-    } else {
-      const newNote = {
-        id: 'note-' + Date.now(),
-        title,
-        subject,
-        tags,
-        body,
-        date: new Date().toLocaleDateString('pt-BR')
-      };
-      this.state.notes.unshift(newNote);
-      this.addXp(150, 'Nova nota criada no Grimório!');
-    }
 
-    this.saveState();
-    this.renderNotes();
+        const { error } = await this.supabase.from('notes').insert(newNote);
+        if (error) throw error;
+
+        this.notes.unshift(newNote);
+        await this.addXp(150, 'Nova nota registrada no Grimório!');
+      }
+
+      this.renderNotes();
+    } catch (err) {
+      console.error(err);
+      this.showToast(`Erro ao salvar nota: ${err.message}`);
+    }
   }
 
   editNote(id) {
-    const note = this.state.notes.find(n => n.id === id);
+    const note = this.notes.find(n => n.id === id);
     if (!note) return;
 
     document.getElementById('editNoteId').value = note.id;
@@ -666,17 +872,29 @@ class ShonenApp {
     this.openModal('noteModal');
   }
 
-  deleteNote(id) {
-    if (confirm('Deseja realmente apagar esta anotação do seu grimório?')) {
-      this.state.notes = this.state.notes.filter(n => n.id !== id);
-      this.saveState();
-      this.renderNotes();
-      this.showToast('Anotação removida.');
+  async deleteNote(id) {
+    if (!this.currentUser || !this.supabase) return;
+    if (confirm('Deseja realmente apagar esta anotação do seu banco Supabase?')) {
+      try {
+        const { error } = await this.supabase
+          .from('notes')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', this.currentUser.id);
+
+        if (error) throw error;
+
+        this.notes = this.notes.filter(n => n.id !== id);
+        this.renderNotes();
+        this.showToast('Anotação removida do banco.');
+      } catch (err) {
+        this.showToast(`Erro ao excluir: ${err.message}`);
+      }
     }
   }
 
   copyNoteContent(id) {
-    const note = this.state.notes.find(n => n.id === id);
+    const note = this.notes.find(n => n.id === id);
     if (!note) return;
     const textToCopy = `# ${note.title}\nAssunto: ${note.subject}\nTags: ${(note.tags || []).join(', ')}\n\n${note.body}`;
     navigator.clipboard.writeText(textToCopy).then(() => {
@@ -685,15 +903,15 @@ class ShonenApp {
     });
   }
 
-  // ================= TASKS / QUESTS ENGINE =================
+  // ================= TASKS / MISSÕES =================
   renderTasks() {
     const container = document.getElementById('tasksListContainer');
     const pendingBadge = document.getElementById('pendingCount');
     const completedBadge = document.getElementById('completedCount');
     if (!container) return;
 
-    const pending = this.state.tasks.filter(t => !t.completed);
-    const completed = this.state.tasks.filter(t => t.completed);
+    const pending = this.tasks.filter(t => !t.completed);
+    const completed = this.tasks.filter(t => t.completed);
 
     if (pendingBadge) pendingBadge.textContent = pending.length;
     if (completedBadge) completedBadge.textContent = completed.length;
@@ -703,7 +921,7 @@ class ShonenApp {
     if (currentList.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 25px; color: var(--text-muted); font-size: 0.85rem;">
-          <p>${this.taskFilter === 'pending' ? 'Nenhuma missão pendente! Descanse ou adicione uma nova.' : 'Nenhuma missão concluída ainda. Mãos à obra!'}</p>
+          <p>${this.taskFilter === 'pending' ? 'Nenhuma missão pendente! Adicione uma nova missão.' : 'Nenhuma missão concluída ainda.'}</p>
         </div>
       `;
       return;
@@ -723,42 +941,72 @@ class ShonenApp {
     `).join('');
   }
 
-  addTask(title, difficulty) {
+  async addTask(title, difficulty) {
+    if (!this.currentUser || !this.supabase) return;
     const xpRewards = { D: 50, C: 100, B: 200, A: 350, S: 500 };
     const newTask = {
       id: 'task-' + Date.now(),
+      user_id: this.currentUser.id,
       title,
       difficulty,
       xp: xpRewards[difficulty] || 100,
-      completed: false
+      completed: false,
+      created_at: new Date().toISOString()
     };
 
-    this.state.tasks.unshift(newTask);
-    this.saveState();
-    this.renderTasks();
-    this.sound.playClick();
-    this.showToast(`Missão Rank ${difficulty} adicionada!`);
-  }
+    try {
+      const { error } = await this.supabase.from('tasks').insert(newTask);
+      if (error) throw error;
 
-  toggleTask(id) {
-    const task = this.state.tasks.find(t => t.id === id);
-    if (!task) return;
-
-    task.completed = !task.completed;
-    if (task.completed) {
-      this.addXp(task.xp, `Missão concluída! (+${task.xp} XP)`);
-    } else {
+      this.tasks.unshift(newTask);
+      this.renderTasks();
       this.sound.playClick();
+      this.showToast(`Missão Rank ${difficulty} salva no Supabase!`);
+    } catch (err) {
+      this.showToast(`Erro ao criar tarefa: ${err.message}`);
     }
-
-    this.saveState();
-    this.renderTasks();
   }
 
-  deleteTask(id) {
-    this.state.tasks = this.state.tasks.filter(t => t.id !== id);
-    this.saveState();
-    this.renderTasks();
+  async toggleTask(id) {
+    const task = this.tasks.find(t => t.id === id);
+    if (!task || !this.currentUser || !this.supabase) return;
+
+    const newCompleted = !task.completed;
+    task.completed = newCompleted;
+
+    try {
+      await this.supabase
+        .from('tasks')
+        .update({ completed: newCompleted })
+        .eq('id', id)
+        .eq('user_id', this.currentUser.id);
+
+      if (newCompleted) {
+        await this.addXp(task.xp, `Missão concluída! (+${task.xp} XP)`);
+      } else {
+        this.sound.playClick();
+      }
+
+      this.renderTasks();
+    } catch (err) {
+      this.showToast(`Erro ao atualizar tarefa: ${err.message}`);
+    }
+  }
+
+  async deleteTask(id) {
+    if (!this.currentUser || !this.supabase) return;
+    try {
+      await this.supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', this.currentUser.id);
+
+      this.tasks = this.tasks.filter(t => t.id !== id);
+      this.renderTasks();
+    } catch (err) {
+      this.showToast(`Erro ao excluir: ${err.message}`);
+    }
   }
 
   // ================= LINKS VAULT =================
@@ -773,7 +1021,7 @@ class ShonenApp {
       tool: 'fa-screwdriver-wrench'
     };
 
-    container.innerHTML = this.state.links.map(l => {
+    container.innerHTML = this.links.map(l => {
       let hostname = '';
       try {
         hostname = new URL(l.url).hostname;
@@ -800,31 +1048,50 @@ class ShonenApp {
     }).join('');
   }
 
-  addLink(title, url, category) {
+  async addLink(title, url, category) {
+    if (!this.currentUser || !this.supabase) return;
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       url = 'https://' + url;
     }
 
     const newLink = {
       id: 'link-' + Date.now(),
+      user_id: this.currentUser.id,
       title,
       url,
-      category
+      category,
+      created_at: new Date().toISOString()
     };
 
-    this.state.links.push(newLink);
-    this.addXp(50, 'Novo recurso adicionado ao cofre!');
-    this.saveState();
-    this.renderLinks();
+    try {
+      const { error } = await this.supabase.from('links').insert(newLink);
+      if (error) throw error;
+
+      this.links.push(newLink);
+      await this.addXp(50, 'Novo recurso adicionado ao cofre!');
+      this.renderLinks();
+    } catch (err) {
+      this.showToast(`Erro ao salvar link: ${err.message}`);
+    }
   }
 
-  deleteLink(id) {
-    this.state.links = this.state.links.filter(l => l.id !== id);
-    this.saveState();
-    this.renderLinks();
+  async deleteLink(id) {
+    if (!this.currentUser || !this.supabase) return;
+    try {
+      await this.supabase
+        .from('links')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', this.currentUser.id);
+
+      this.links = this.links.filter(l => l.id !== id);
+      this.renderLinks();
+    } catch (err) {
+      this.showToast(`Erro ao excluir: ${err.message}`);
+    }
   }
 
-  // ================= POMODORO SALA DO TEMPO =================
+  // ================= POMODORO & TREINO =================
   setPomodoroMode(mode, minutes) {
     this.stopPomodoro();
     this.timerMode = mode;
@@ -857,7 +1124,7 @@ class ShonenApp {
       startBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pausar Treino';
     }
 
-    this.timerInterval = setInterval(() => {
+    this.timerInterval = setInterval(async () => {
       this.timerTimeLeft--;
       this.updatePomodoroDisplay();
 
@@ -871,8 +1138,10 @@ class ShonenApp {
         }
 
         if (this.timerMode === 'focus') {
-          this.addXp(120, 'Ciclo da Sala do Tempo Concluído!');
-          alert('⚡ Parabéns guerreiro! Seu tempo de treino terminou. Hora de descansar a mente!');
+          // Register training session in Supabase!
+          await this.recordTrainingSession();
+          await this.addXp(120, 'Ciclo da Sala do Tempo Concluído!');
+          alert('⚡ Parabéns guerreiro! Seu tempo de treino terminou e foi salvo no Supabase!');
         } else {
           alert('🔔 Descanso finalizado! Pronto para o próximo round de estudos?');
         }
@@ -901,6 +1170,28 @@ class ShonenApp {
     this.updatePomodoroDisplay();
   }
 
+  async recordTrainingSession() {
+    if (!this.currentUser || !this.supabase) return;
+    const durationMin = Math.round(this.timerTotal / 60);
+
+    try {
+      await this.supabase.from('trainings').insert({
+        id: 'train-' + Date.now(),
+        user_id: this.currentUser.id,
+        mode: this.timerMode,
+        duration_minutes: durationMin,
+        xp_earned: 120,
+        completed_at: new Date().toISOString()
+      });
+
+      this.trainingsCount++;
+      const countEl = document.getElementById('trainingCountDisplay');
+      if (countEl) countEl.textContent = this.trainingsCount;
+    } catch (err) {
+      console.warn('Erro ao salvar sessão de treino:', err);
+    }
+  }
+
   updatePomodoroDisplay() {
     const mins = Math.floor(this.timerTimeLeft / 60);
     const secs = this.timerTimeLeft % 60;
@@ -909,36 +1200,33 @@ class ShonenApp {
     const timerTimeEl = document.getElementById('timerTime');
     if (timerTimeEl) timerTimeEl.textContent = formatted;
 
-    // Browser tab title update
     if (this.timerIsRunning) {
       document.title = `(${formatted}) ⚡ Shonen Study Hub`;
     } else {
       document.title = 'Shonen Study Hub ⚡ Plataforma de Estudos Anime';
     }
 
-    // Circular progress SVG
     const circle = document.getElementById('timerCircleProgress');
     if (circle) {
       const radius = 44;
-      const circumference = 2 * Math.PI * radius; // ~276.46
+      const circumference = 2 * Math.PI * radius;
       const offset = circumference - (this.timerTimeLeft / this.timerTotal) * circumference;
       circle.style.strokeDashoffset = offset;
     }
   }
 
-  // ================= SHARING & BACKUP (PARTILHAR COM AMIGOS) =================
+  // ================= SHARING & BACKUP =================
   generateShareLink() {
     try {
       const exportData = {
-        hubVersion: '1.0',
-        creator: this.state.profile.name,
-        notes: this.state.notes,
-        links: this.state.links,
-        tasks: this.state.tasks
+        hubVersion: '2.0',
+        creator: this.userProfile.name,
+        notes: this.notes,
+        links: this.links,
+        tasks: this.tasks
       };
 
       const jsonStr = JSON.stringify(exportData);
-      // Encode cleanly using base64 with UTF-8 support
       const encoded = btoa(encodeURIComponent(jsonStr));
       const fullUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
 
@@ -964,29 +1252,21 @@ class ShonenApp {
         const sharedData = JSON.parse(decodedJson);
 
         if (sharedData && (sharedData.notes || sharedData.links)) {
-          setTimeout(() => {
+          setTimeout(async () => {
             const confirmImport = confirm(
-              `⚡ Seu amigo (${sharedData.creator || 'Um Guerreiro'}) compartilhou um pacote de estudos com ${sharedData.notes?.length || 0} anotações e ${sharedData.links?.length || 0} recursos!\n\nDeseja importar esse conteúdo para o seu Shonen Study Hub agora?`
+              `⚡ Seu amigo (${sharedData.creator || 'Um Guerreiro'}) compartilhou um pacote de estudos com ${sharedData.notes?.length || 0} anotações e ${sharedData.links?.length || 0} recursos!\n\nDeseja importar esse conteúdo para a sua conta Supabase agora?`
             );
-            if (confirmImport) {
-              if (sharedData.notes) {
-                this.state.notes = [...sharedData.notes, ...this.state.notes];
+            if (confirmImport && this.currentUser && this.supabase) {
+              for (let n of (sharedData.notes || [])) {
+                await this.saveNote(n.title, n.subject || 'Geral', (n.tags || []).join(', '), n.body);
               }
-              if (sharedData.links) {
-                this.state.links = [...sharedData.links, ...this.state.links];
+              for (let l of (sharedData.links || [])) {
+                await this.addLink(l.title, l.url, l.category || 'doc');
               }
-              if (sharedData.tasks) {
-                this.state.tasks = [...sharedData.tasks, ...this.state.tasks];
-              }
-              this.saveState();
-              this.renderNotes();
-              this.renderTasks();
-              this.renderLinks();
-              this.showToast('Pacote de estudos do amigo importado com sucesso!');
-              // Clean hash
+              this.showToast('Pacote de estudos importado com sucesso!');
               window.history.replaceState(null, null, window.location.pathname);
             }
-          }, 800);
+          }, 1200);
         }
       } catch (err) {
         console.warn('Could not parse shared URL data:', err);
@@ -995,10 +1275,16 @@ class ShonenApp {
   }
 
   exportJsonFile() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.state, null, 2));
+    const fullBackup = {
+      profile: this.userProfile,
+      notes: this.notes,
+      tasks: this.tasks,
+      links: this.links
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullBackup, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `shonen-study-backup-${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute("download", `shonen-study-supabase-backup-${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -1006,27 +1292,28 @@ class ShonenApp {
     this.showToast('Arquivo de backup JSON baixado com sucesso!');
   }
 
-  importJsonFile(file) {
+  async importJsonFile(file) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const imported = JSON.parse(e.target.result);
-        if (imported.notes && imported.profile) {
-          this.state = imported;
-          this.saveState();
-          this.applyTheme(this.state.theme || 'multiverse', false);
-          this.updateUserStatsDisplay();
-          this.renderNotes();
-          this.renderTasks();
-          this.renderLinks();
+        if (this.currentUser && this.supabase) {
+          if (imported.notes) {
+            for (let n of imported.notes) {
+              await this.saveNote(n.title, n.subject, (n.tags || []).join(','), n.body);
+            }
+          }
+          if (imported.links) {
+            for (let l of imported.links) {
+              await this.addLink(l.title, l.url, l.category);
+            }
+          }
           this.sound.playSuccess();
-          this.showToast('Backup JSON restaurado com sucesso!');
+          this.showToast('Dados do arquivo importados para o Supabase com sucesso!');
           this.closeModal('shareModal');
-        } else {
-          alert('Arquivo JSON inválido. Formato não reconhecido.');
         }
       } catch (err) {
-        alert('Erro ao ler arquivo JSON.');
+        alert('Erro ao ler ou importar arquivo JSON.');
       }
     };
     reader.readAsText(file);
@@ -1073,7 +1360,7 @@ class ShonenApp {
 
   // ================= EVENT LISTENERS =================
   setupEventListeners() {
-    // Theme switch buttons
+    // Theme buttons
     document.querySelectorAll('.theme-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         this.applyTheme(btn.dataset.themeTarget);
@@ -1084,16 +1371,60 @@ class ShonenApp {
     const soundBtn = document.getElementById('soundToggleBtn');
     if (soundBtn) {
       soundBtn.addEventListener('click', () => {
-        this.state.soundEnabled = !this.state.soundEnabled;
-        soundBtn.innerHTML = this.state.soundEnabled
+        this.soundEnabled = !this.soundEnabled;
+        soundBtn.innerHTML = this.soundEnabled
           ? '<i class="fa-solid fa-volume-high"></i>'
           : '<i class="fa-solid fa-volume-xmark"></i>';
-        this.showToast(this.state.soundEnabled ? 'Efeitos sonoros ativados!' : 'Efeitos sonoros mutados.');
-        this.saveState();
+        this.showToast(this.soundEnabled ? 'Efeitos sonoros ativados!' : 'Efeitos sonoros mutados.');
       });
     }
 
-    // Modal open buttons
+    // Auth screen tabs
+    document.getElementById('tabLoginBtn')?.addEventListener('click', () => this.setAuthMode('login'));
+    document.getElementById('tabRegisterBtn')?.addEventListener('click', () => this.setAuthMode('register'));
+    document.getElementById('authForm')?.addEventListener('submit', (e) => this.handleAuthSubmit(e));
+
+    // Password visibility toggle
+    document.getElementById('togglePasswordBtn')?.addEventListener('click', () => {
+      const passInput = document.getElementById('authPasswordInput');
+      const icon = document.querySelector('#togglePasswordBtn i');
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+      } else {
+        passInput.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn')?.addEventListener('click', () => this.logout());
+
+    // Config Supabase Modal
+    document.getElementById('openDbConfigBtn')?.addEventListener('click', () => {
+      const cfg = window.SUPABASE_CONFIG || {};
+      document.getElementById('cfgSupabaseUrl').value = cfg.url || '';
+      document.getElementById('cfgSupabaseAnonKey').value = cfg.anonKey || '';
+      this.openModal('dbConfigModal');
+    });
+
+    document.getElementById('dbConfigForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newUrl = document.getElementById('cfgSupabaseUrl').value.trim();
+      const newKey = document.getElementById('cfgSupabaseAnonKey').value.trim();
+
+      window.SUPABASE_CONFIG.url = newUrl;
+      window.SUPABASE_CONFIG.anonKey = newKey;
+
+      localStorage.setItem('SHONEN_SUPABASE_URL', newUrl);
+      localStorage.setItem('SHONEN_SUPABASE_ANON_KEY', newKey);
+
+      this.closeModal('dbConfigModal');
+      this.showToast('Chaves salvas! Conectando ao Supabase...');
+      await this.initSupabase();
+    });
+
+    // General Modal Open Buttons
     document.getElementById('openShareModalBtn')?.addEventListener('click', () => this.openModal('shareModal'));
     document.getElementById('openNewNoteBtn')?.addEventListener('click', () => {
       document.getElementById('noteForm').reset();
@@ -1109,11 +1440,11 @@ class ShonenApp {
       document.getElementById('quickTaskInput').focus();
     });
     document.getElementById('userBadge')?.addEventListener('click', () => {
-      document.getElementById('profileNameInput').value = this.state.profile.name;
+      document.getElementById('profileNameInput').value = this.userProfile.name;
       this.openModal('profileModal');
     });
 
-    // Modal close triggers
+    // Close buttons for modals
     document.querySelectorAll('[data-close-modal]').forEach(btn => {
       btn.addEventListener('click', () => {
         this.closeModal(btn.dataset.closeModal);
@@ -1191,18 +1522,23 @@ class ShonenApp {
     });
 
     // Profile Form
-    document.getElementById('profileForm')?.addEventListener('submit', (e) => {
+    document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const newName = document.getElementById('profileNameInput').value.trim();
       const selectedAvatar = document.querySelector('input[name="avatarRadio"]:checked')?.value || 'goku';
 
-      if (newName) {
-        this.state.profile.name = newName;
-        this.state.profile.avatar = selectedAvatar;
+      if (newName && this.currentUser && this.supabase) {
+        this.userProfile.name = newName;
+        this.userProfile.avatar = selectedAvatar;
         this.updateUserStatsDisplay();
-        this.saveState();
+
+        await this.supabase
+          .from('profiles')
+          .update({ name: newName, avatar: selectedAvatar, updated_at: new Date().toISOString() })
+          .eq('id', this.currentUser.id);
+
         this.sound.playPowerUp();
-        this.showToast('Perfil de Guerreiro atualizado!');
+        this.showToast('Perfil atualizado no Supabase!');
         this.closeModal('profileModal');
       }
     });

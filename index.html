@@ -1,26 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shonen Study Hub ⚡ Plataforma de Estudos Anime</title>
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2224%22>⚡</text></svg>">
-
-  <!-- Google Fonts: Orbitron & Inter & Cinzel Decorative -->
+  <title>Shonen Study Hub ⚡ Plataforma de Estudos Anime & Supabase</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2224%22>⚡</text></svg>">
+  
+  <!-- Google Fonts: Orbitron & Inter & Bungee -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@300;400;500;600;700;900&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@600;700&display=swap"
-    rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@300;400;500;600;700;900&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+  
   <!-- FontAwesome for Anime & Utility Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Supabase CDN Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Supabase Config Loader -->
+  <script src="supabase-config.js"></script>
 
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body data-theme="multiverse">
   <!-- Interactive Canvas Particle Background -->
   <canvas id="energyCanvas"></canvas>
@@ -29,8 +30,122 @@
   <div class="wallpaper-overlay" id="wallpaperOverlay"></div>
   <div class="cyber-grid-overlay"></div>
 
-  <!-- Main App Shell -->
-  <div class="app-container">
+  <!-- ================= AUTH SCREEN / TELA DE LOGIN & CADASTRO ================= -->
+  <div class="auth-wrapper" id="authScreen">
+    <div class="auth-card glass-panel">
+      
+      <!-- Anime Universe Switcher on Login Screen -->
+      <div class="theme-bar auth-theme-bar">
+        <button class="theme-btn active" data-theme-target="multiverse" title="Multiverso Shonen">
+          <span class="icon">🌌</span>
+        </button>
+        <button class="theme-btn" data-theme-target="dragonball" title="Dragon Ball - Goku Ki">
+          <span class="icon">🟠</span>
+        </button>
+        <button class="theme-btn" data-theme-target="onepiece" title="One Piece - Luffy Haki">
+          <span class="icon">🏴‍☠️</span>
+        </button>
+        <button class="theme-btn" data-theme-target="naruto" title="Naruto - Chakra Sage">
+          <span class="icon">🍥</span>
+        </button>
+        <button class="theme-btn" data-theme-target="mha" title="My Hero Academia - Deku OFA">
+          <span class="icon">🥦</span>
+        </button>
+      </div>
+
+      <div class="auth-header">
+        <div class="logo-badge pulse-icon">
+          <i class="fa-solid fa-bolt-lightning"></i>
+        </div>
+        <h2 class="auth-title">SHONEN <span class="gradient-text">STUDY HUB</span></h2>
+        <p class="auth-subtitle">Conectado ao Supabase • Salve suas notas, treinos e XP na nuvem</p>
+      </div>
+
+      <!-- Auth Tabs: Login vs Register -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLoginBtn" type="button">
+          <i class="fa-solid fa-right-to-bracket"></i> Entrar
+        </button>
+        <button class="auth-tab" id="tabRegisterBtn" type="button">
+          <i class="fa-solid fa-user-plus"></i> Criar Conta
+        </button>
+      </div>
+
+      <!-- Feedback / Error Banner -->
+      <div class="auth-alert" id="authAlert" style="display: none;"></div>
+
+      <!-- Auth Form -->
+      <form id="authForm" class="auth-form">
+        <!-- Name & Avatar (Visible only in Register mode) -->
+        <div class="form-group" id="registerNameGroup" style="display: none;">
+          <label for="authNameInput"><i class="fa-solid fa-id-card"></i> Nome / Codinome do Guerreiro</label>
+          <input type="text" id="authNameInput" placeholder="Ex: Son Goku / Guerreiro Z">
+        </div>
+
+        <div class="form-group" id="registerAvatarGroup" style="display: none;">
+          <label><i class="fa-solid fa-user-ninja"></i> Escolha seu Avatar Inicial</label>
+          <div class="avatar-selector-grid">
+            <label class="avatar-option">
+              <input type="radio" name="authAvatarRadio" value="goku" checked>
+              <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=100&auto=format&fit=crop&q=80" alt="Goku">
+              <span>Goku</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="authAvatarRadio" value="luffy">
+              <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=100&auto=format&fit=crop&q=80" alt="Luffy">
+              <span>Luffy</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="authAvatarRadio" value="naruto">
+              <img src="https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=100&auto=format&fit=crop&q=80" alt="Naruto">
+              <span>Naruto</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="authAvatarRadio" value="deku">
+              <img src="https://images.unsplash.com/photo-1563089145-599997674d42?w=100&auto=format&fit=crop&q=80" alt="Deku">
+              <span>Deku</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Email Field -->
+        <div class="form-group">
+          <label for="authEmailInput"><i class="fa-solid fa-envelope"></i> E-mail de Acesso</label>
+          <input type="email" id="authEmailInput" placeholder="exemplo@shonen.com" required autocomplete="email">
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="authPasswordInput"><i class="fa-solid fa-lock"></i> Senha</label>
+          <div class="password-input-wrap">
+            <input type="password" id="authPasswordInput" placeholder="Mínimo 6 caracteres" required autocomplete="current-password">
+            <button type="button" class="toggle-password-btn" id="togglePasswordBtn" title="Exibir/Ocultar Senha">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary glow-btn auth-submit-btn" id="authSubmitBtn">
+          <i class="fa-solid fa-bolt"></i> <span id="authSubmitText">Entrar no Shonen Hub</span>
+        </button>
+      </form>
+
+      <!-- Supabase Connection Status & Key Setup Footer -->
+      <div class="auth-footer">
+        <div class="db-status-pill" id="dbStatusPill">
+          <span class="status-dot"></span> <span id="dbStatusText">Verificando Supabase...</span>
+        </div>
+        <button class="config-link-btn" id="openDbConfigBtn">
+          <i class="fa-solid fa-gear"></i> Configurar Chaves Supabase
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MAIN APP DASHBOARD (Visível após login) ================= -->
+  <div class="app-container" id="mainDashboard" style="display: none;">
+
     <!-- Top Navigation / Header -->
     <header class="app-header glass-panel">
       <div class="logo-area">
@@ -39,7 +154,7 @@
         </div>
         <div>
           <h1 class="logo-title">SHONEN <span class="gradient-text">STUDY HUB</span></h1>
-          <p class="logo-sub">Central de Estudos Multiverso • Treine seu Conhecimento</p>
+          <p class="logo-sub">Central de Estudos Multiverso • Sincronizado no Supabase</p>
         </div>
       </div>
 
@@ -67,8 +182,13 @@
         </button>
       </div>
 
-      <!-- User Stats & Utility Actions -->
+      <!-- User Stats & Actions -->
       <div class="header-actions">
+        <!-- Supabase Cloud Sync Badge -->
+        <div class="cloud-sync-badge" id="cloudSyncBadge" title="Dados salvos no banco Supabase">
+          <i class="fa-solid fa-cloud-check"></i> <span>Nuvem Ativa</span>
+        </div>
+
         <!-- Audio Effects Toggle -->
         <button class="icon-action-btn" id="soundToggleBtn" title="Ativar/Desativar Efeitos Sonoros">
           <i class="fa-solid fa-volume-high"></i>
@@ -83,39 +203,40 @@
         <!-- Profile Avatar & Power Level -->
         <div class="user-power-badge" id="userBadge" title="Clique para editar seu Perfil">
           <div class="avatar-ring">
-            <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=100&auto=format&fit=crop&q=80"
-              alt="Avatar" id="userAvatarImg">
+            <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=100&auto=format&fit=crop&q=80" alt="Avatar" id="userAvatarImg">
           </div>
           <div class="power-info">
-            <span class="user-name" id="userNameLabel">Guerreiro Z</span>
-            <span class="power-stat"><i class="fa-solid fa-fire"></i> Poder: <strong
-                id="powerLevelDisplay">9.001+</strong></span>
+            <span class="user-name" id="userNameLabel">Carregando...</span>
+            <span class="power-stat"><i class="fa-solid fa-fire"></i> Poder: <strong id="powerLevelDisplay">9.001+</strong></span>
           </div>
         </div>
+
+        <!-- Logout Button -->
+        <button class="btn btn-sm btn-secondary logout-btn" id="logoutBtn" title="Desconectar do Supabase">
+          <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </button>
       </div>
     </header>
 
-    <!-- Motivational Banner / Daily Quote -->
+    <!-- Motivational Banner / Daily Quote & Level Progress -->
     <section class="banner-section glass-panel">
       <div class="banner-content">
         <div class="banner-tag">
           <i class="fa-solid fa-quote-left"></i> FRASE SHONEN DO DIA
         </div>
-        <p class="quote-text" id="dailyQuoteText">"Os limites só existem se você os deixar existir. Supere a si mesmo
-          todos os dias!"</p>
+        <p class="quote-text" id="dailyQuoteText">"Os limites só existem se você os deixar existir. Supere a si mesmo todos os dias!"</p>
         <span class="quote-author" id="dailyQuoteAuthor">— Son Goku (Dragon Ball Super)</span>
       </div>
       <div class="level-progress-container">
         <div class="level-header">
           <span><i class="fa-solid fa-award"></i> Rank: <strong id="currentRankLabel">Sayajin de Elite</strong></span>
-          <span>XP: <strong id="currentXpText">450</strong> / <span id="nextLevelXpText">1000</span></span>
+          <span>XP: <strong id="currentXpText">0</strong> / <span id="nextLevelXpText">500</span></span>
         </div>
         <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="xpProgressBar" style="width: 45%;"></div>
+          <div class="progress-bar-fill" id="xpProgressBar" style="width: 10%;"></div>
         </div>
         <div class="streak-badge">
-          <i class="fa-solid fa-fire-flame-curved"></i> Sequência de Estudos: <strong id="studyStreakDisplay">3
-            Dias</strong>
+          <i class="fa-solid fa-fire-flame-curved"></i> Sequência de Estudos: <strong id="studyStreakDisplay">1 Dia</strong>
         </div>
       </div>
     </section>
@@ -132,7 +253,7 @@
             <h3><i class="fa-solid fa-stopwatch-20"></i> Sala do Tempo</h3>
             <span class="card-pill" id="pomoModeBadge">Foco Intenso</span>
           </div>
-
+          
           <div class="timer-display-wrap">
             <div class="timer-circle-svg">
               <svg viewBox="0 0 100 100">
@@ -167,6 +288,11 @@
               <option value="cosmic">Aura Cósmica (Energia)</option>
             </select>
           </div>
+
+          <!-- Total Training Sessions Synced to Supabase -->
+          <div class="training-stats-row">
+            <span><i class="fa-solid fa-dumbbell"></i> Treinos no BD: <strong id="trainingCountDisplay">0</strong></span>
+          </div>
         </div>
 
         <!-- Links Rápidos / Cofre de Recursos -->
@@ -179,7 +305,7 @@
           </div>
 
           <div class="links-list" id="linksListContainer">
-            <!-- Dynamically Rendered -->
+            <!-- Dynamically Rendered from Supabase -->
           </div>
         </div>
 
@@ -191,7 +317,7 @@
           <div class="card-header">
             <div>
               <h3><i class="fa-solid fa-scroll"></i> Grimório de Estudos</h3>
-              <p class="subtitle">Guarde seus resumos, fórmulas, códigos e anotações</p>
+              <p class="subtitle">Salvo na nuvem no Supabase • Total isolamento por usuário</p>
             </div>
             <button class="btn btn-primary glow-btn" id="openNewNoteBtn">
               <i class="fa-solid fa-feather-pointed"></i> Nova Nota
@@ -202,8 +328,7 @@
           <div class="filter-search-bar">
             <div class="search-input-wrap">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="noteSearchInput"
-                placeholder="Buscar resumos por título, matéria ou palavra-chave...">
+              <input type="text" id="noteSearchInput" placeholder="Buscar resumos por título, matéria ou palavra-chave...">
             </div>
             <select id="noteSubjectFilter" class="styled-select">
               <option value="all">Todas as Matérias</option>
@@ -218,7 +343,7 @@
 
           <!-- Notes Cards Container -->
           <div class="notes-grid" id="notesGridContainer">
-            <!-- Dynamically populated notes -->
+            <!-- Dynamically populated notes from Supabase -->
           </div>
         </div>
       </section>
@@ -229,7 +354,7 @@
           <div class="card-header">
             <div>
               <h3><i class="fa-solid fa-khanda"></i> Missões de Treino</h3>
-              <p class="subtitle">Complete tarefas e ganhe XP</p>
+              <p class="subtitle">Complete tarefas e ganhe XP no banco</p>
             </div>
             <button class="btn btn-sm btn-secondary" id="openAddQuestBtn">
               <i class="fa-solid fa-plus"></i> Missão
@@ -238,7 +363,7 @@
 
           <!-- Quick Add Task -->
           <form class="quick-add-task-form" id="quickTaskForm">
-            <input type="text" id="quickTaskInput" placeholder="Nova missão (Ex: Terminar cap. 3 de Redes)..." required>
+            <input type="text" id="quickTaskInput" placeholder="Nova missão (Ex: Estudar Banco de Dados)..." required>
             <select id="quickTaskDifficulty" class="styled-select">
               <option value="D">Rank D (+50 XP)</option>
               <option value="C" selected>Rank C (+100 XP)</option>
@@ -253,15 +378,13 @@
 
           <!-- Task Tabs -->
           <div class="task-tabs">
-            <button class="task-tab active" data-task-filter="pending">Pendentes (<span
-                id="pendingCount">0</span>)</button>
-            <button class="task-tab" data-task-filter="completed">Concluídas (<span
-                id="completedCount">0</span>)</button>
+            <button class="task-tab active" data-task-filter="pending">Pendentes (<span id="pendingCount">0</span>)</button>
+            <button class="task-tab" data-task-filter="completed">Concluídas (<span id="completedCount">0</span>)</button>
           </div>
 
           <!-- Tasks List Container -->
           <div class="tasks-list" id="tasksListContainer">
-            <!-- Dynamically populated tasks -->
+            <!-- Dynamically populated tasks from Supabase -->
           </div>
         </div>
 
@@ -274,8 +397,7 @@
             </button>
           </div>
           <div class="flashcard-body" id="studyTipContent">
-            <p><strong>Técnica Feynman:</strong> Explique o assunto que você acabou de estudar em termos tão simples
-              como se estivesse ensinando uma criança de 8 anos.</p>
+            <p><strong>Técnica Feynman:</strong> Explique o assunto que você acabou de estudar em termos tão simples como se estivesse ensinando uma criança de 8 anos.</p>
           </div>
         </div>
 
@@ -286,20 +408,48 @@
     <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-left">
-        <span>⚡ <strong>Shonen Study Hub</strong> • Feito para guerreiros do conhecimento</span>
+        <span>⚡ <strong>Shonen Study Hub</strong> • Powered by <strong>Supabase Cloud Database</strong></span>
       </div>
       <div class="footer-center">
-        <span>Pronto para GitHub Pages • Dados salvos localmente no navegador</span>
+        <span id="userEmailBadgeFooter">Autenticado com sucesso</span>
       </div>
       <div class="footer-right">
-        <a href="https://github.com" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> Colocar no
-          meu GitHub</a>
+        <a href="https://github.com/valentindasilvafaustino/valentindasilvafaustino.github.io" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> Meu Repositório GitHub</a>
       </div>
     </footer>
 
   </div>
 
   <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal: Configuração do Supabase (URL & Anon Key) -->
+  <div class="modal-backdrop" id="dbConfigModal">
+    <div class="modal-window glass-panel">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-database"></i> Conexão com o Supabase</h3>
+        <button class="modal-close-btn" data-close-modal="dbConfigModal">&times;</button>
+      </div>
+      <form id="dbConfigForm">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+          As credenciais podem ser definidas no seu arquivo <code>.env</code>, <code>supabase-config.js</code> ou coladas abaixo para salvar diretamente no navegador:
+        </p>
+        <div class="form-group">
+          <label for="cfgSupabaseUrl">URL do Projeto Supabase (Project URL)</label>
+          <input type="url" id="cfgSupabaseUrl" placeholder="https://seu-projeto.supabase.co" required>
+        </div>
+        <div class="form-group">
+          <label for="cfgSupabaseAnonKey">Chave Pública Anônima (anon public key)</label>
+          <input type="text" id="cfgSupabaseAnonKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="dbConfigModal">Fechar</button>
+          <button type="submit" class="btn btn-primary glow-btn">
+            <i class="fa-solid fa-plug"></i> Salvar e Conectar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Modal: Nova / Editar Nota -->
   <div class="modal-backdrop" id="noteModal">
@@ -328,18 +478,17 @@
           </div>
           <div class="form-group half">
             <label for="noteTagsInput">Tags (separadas por vírgula)</label>
-            <input type="text" id="noteTagsInput" placeholder="ex: backend, algoritmos, prova">
+            <input type="text" id="noteTagsInput" placeholder="ex: backend, sql, prova">
           </div>
         </div>
         <div class="form-group">
-          <label for="noteBodyInput">Conteúdo / Resumo (Suporta Markdown simples, fórmulas e código)</label>
-          <textarea id="noteBodyInput" rows="9"
-            placeholder="Escreva seu resumo, pontos-chave, links ou fórmulas aqui..." required></textarea>
+          <label for="noteBodyInput">Conteúdo / Resumo</label>
+          <textarea id="noteBodyInput" rows="9" placeholder="Escreva seu resumo, pontos-chave, links ou fórmulas aqui..." required></textarea>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal="noteModal">Cancelar</button>
           <button type="submit" class="btn btn-primary glow-btn">
-            <i class="fa-solid fa-floppy-disk"></i> Salvar no Grimório (+150 XP)
+            <i class="fa-solid fa-cloud-arrow-up"></i> Salvar no Supabase (+150 XP)
           </button>
         </div>
       </form>
@@ -350,30 +499,30 @@
   <div class="modal-backdrop" id="linkModal">
     <div class="modal-window glass-panel">
       <div class="modal-header">
-        <h3><i class="fa-solid fa-link"></i> Adicionar Recurso de Estudo</h3>
+        <h3><i class="fa-solid fa-link"></i> Adicionar Recurso ao Cofre</h3>
         <button class="modal-close-btn" data-close-modal="linkModal">&times;</button>
       </div>
       <form id="linkForm">
         <div class="form-group">
           <label for="linkTitleInput">Nome do Recurso</label>
-          <input type="text" id="linkTitleInput" placeholder="Ex: Documentação MDN Web Docs" required>
+          <input type="text" id="linkTitleInput" placeholder="Ex: Documentação Supabase Auth" required>
         </div>
         <div class="form-group">
           <label for="linkUrlInput">URL / Link</label>
-          <input type="url" id="linkUrlInput" placeholder="https://developer.mozilla.org" required>
+          <input type="url" id="linkUrlInput" placeholder="https://supabase.com/docs" required>
         </div>
         <div class="form-group">
           <label for="linkCategorySelect">Categoria</label>
           <select id="linkCategorySelect" class="styled-select">
-            <option value="video"><i class="fa-brands fa-youtube"></i> Vídeo / Aula</option>
-            <option value="doc"><i class="fa-solid fa-file-lines"></i> Documentação / Artigo</option>
-            <option value="book"><i class="fa-solid fa-book"></i> Livro / PDF</option>
-            <option value="tool"><i class="fa-solid fa-screwdriver-wrench"></i> Ferramenta / Plataforma</option>
+            <option value="video">Vídeo / Aula</option>
+            <option value="doc">Documentação / Artigo</option>
+            <option value="book">Livro / PDF</option>
+            <option value="tool">Ferramenta / Plataforma</option>
           </select>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal="linkModal">Cancelar</button>
-          <button type="submit" class="btn btn-primary glow-btn"><i class="fa-solid fa-plus"></i> Guardar Link</button>
+          <button type="submit" class="btn btn-primary glow-btn"><i class="fa-solid fa-plus"></i> Guardar no Banco</button>
         </div>
       </form>
     </div>
@@ -387,14 +536,13 @@
         <button class="modal-close-btn" data-close-modal="shareModal">&times;</button>
       </div>
       <div class="share-modal-body">
-
+        
         <!-- Option 1: Magic Share Link -->
         <div class="share-card">
           <div class="share-icon-wrap"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
           <div class="share-info">
             <h4>1. Gerar Link Mágico para Amigos</h4>
-            <p>Gere um link com todas as suas anotações e recursos compactados na URL. Seu amigo só precisa abrir o link
-              para importar tudo direto!</p>
+            <p>Gere um link com todas as suas anotações e recursos compactados na URL. Seu amigo só precisa abrir o link para importar tudo direto!</p>
             <div class="link-copy-group">
               <input type="text" id="shareUrlField" readonly placeholder="Clique em 'Gerar Link' abaixo...">
               <button class="btn btn-primary" id="generateShareLinkBtn">
@@ -413,8 +561,7 @@
           <div class="share-icon-wrap"><i class="fa-solid fa-file-arrow-down"></i></div>
           <div class="share-info">
             <h4>2. Baixar Arquivo de Backup (JSON)</h4>
-            <p>Salve suas anotações, tarefas e poder em um arquivo seguro no seu computador ou envie o arquivo no
-              Discord/WhatsApp para seus amigos.</p>
+            <p>Salve suas anotações, tarefas e treinos em um arquivo seguro no seu computador para enviar no Discord/WhatsApp.</p>
             <div class="action-btn-row">
               <button class="btn btn-secondary" id="exportJsonBtn">
                 <i class="fa-solid fa-download"></i> Baixar Dados (JSON)
@@ -427,25 +574,18 @@
           </div>
         </div>
 
-        <!-- Option 3: GitHub Hosting Guide -->
+        <!-- Option 3: Supabase SQL Setup Reminder -->
         <div class="share-card">
-          <div class="share-icon-wrap"><i class="fa-brands fa-github"></i></div>
+          <div class="share-icon-wrap"><i class="fa-solid fa-database"></i></div>
           <div class="share-info">
-            <h4>3. Como publicar no GitHub Pages (Gratuito)</h4>
-            <ol class="github-steps">
-              <li>Crie um repositório no seu GitHub (ex: <code>shonen-study</code>).</li>
-              <li>Envie estes arquivos (<code>index.html</code>, <code>style.css</code>, <code>app.js</code>,
-                <code>README.md</code>).</li>
-              <li>No GitHub, vá em <strong>Settings > Pages > Branch: main > Save</strong>.</li>
-              <li>Pronto! Você terá um link público (ex: <code>seunome.github.io/shonen-study</code>) para acessar de
-                qualquer PC ou celular!</li>
-            </ol>
+            <h4>3. Banco de Dados Supabase</h4>
+            <p>Certifique-se de executar o script <code>supabase_schema.sql</code> no seu editor SQL do Supabase para criar as tabelas com segurança Row Level Security (RLS).</p>
           </div>
         </div>
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-close-modal="shareModal">Entendido!</button>
+        <button type="button" class="btn btn-primary" data-close-modal="shareModal">Fechar</button>
       </div>
     </div>
   </div>
@@ -466,34 +606,30 @@
           <label>Escolha seu Avatar Shonen</label>
           <div class="avatar-selector-grid">
             <label class="avatar-option">
-              <input type="radio" name="avatarRadio" value="goku" checked>
-              <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=100&auto=format&fit=crop&q=80"
-                alt="Goku">
+              <input type="radio" name="avatarRadio" value="goku">
+              <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=100&auto=format&fit=crop&q=80" alt="Goku">
               <span>Goku</span>
             </label>
             <label class="avatar-option">
               <input type="radio" name="avatarRadio" value="luffy">
-              <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=100&auto=format&fit=crop&q=80"
-                alt="Luffy">
+              <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=100&auto=format&fit=crop&q=80" alt="Luffy">
               <span>Luffy</span>
             </label>
             <label class="avatar-option">
               <input type="radio" name="avatarRadio" value="naruto">
-              <img src="https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=100&auto=format&fit=crop&q=80"
-                alt="Naruto">
+              <img src="https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=100&auto=format&fit=crop&q=80" alt="Naruto">
               <span>Naruto</span>
             </label>
             <label class="avatar-option">
               <input type="radio" name="avatarRadio" value="deku">
-              <img src="https://images.unsplash.com/photo-1563089145-599997674d42?w=100&auto=format&fit=crop&q=80"
-                alt="Deku">
+              <img src="https://images.unsplash.com/photo-1563089145-599997674d42?w=100&auto=format&fit=crop&q=80" alt="Deku">
               <span>Deku</span>
             </label>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal="profileModal">Fechar</button>
-          <button type="submit" class="btn btn-primary glow-btn">Atualizar Perfil</button>
+          <button type="submit" class="btn btn-primary glow-btn">Atualizar Perfil no Supabase</button>
         </div>
       </form>
     </div>
@@ -502,8 +638,7 @@
   <!-- Notification Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Audio elements & Scripts -->
+  <!-- Scripts -->
   <script src="app.js"></script>
 </body>
-
 </html>
