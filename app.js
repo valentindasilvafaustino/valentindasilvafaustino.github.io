@@ -411,6 +411,10 @@ class ShonenApp {
 
       // Setup Auth state listener
       this.supabase.auth.onAuthStateChange(async (event, currentSession) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          this.openModal('newPasswordRecoveryModal');
+          return;
+        }
         if (currentSession && currentSession.user) {
           this.currentUser = currentSession.user;
           this.showDashboard();
@@ -1378,16 +1382,72 @@ class ShonenApp {
     document.getElementById('tabRegisterBtn')?.addEventListener('click', () => this.setAuthMode('register'));
     document.getElementById('authForm')?.addEventListener('submit', (e) => this.handleAuthSubmit(e));
 
-    // Password visibility toggle
-    document.getElementById('togglePasswordBtn')?.addEventListener('click', () => {
-      const passInput = document.getElementById('authPasswordInput');
-      const icon = document.querySelector('#togglePasswordBtn i');
-      if (passInput.type === 'password') {
-        passInput.type = 'text';
-        icon.className = 'fa-solid fa-eye-slash';
-      } else {
-        passInput.type = 'password';
-        icon.className = 'fa-solid fa-eye';
+    // Password visibility toggle helper
+    const setupToggle = (btnId, inputId) => {
+      document.getElementById(btnId)?.addEventListener('click', () => {
+        const input = document.getElementById(inputId);
+        const icon = document.querySelector(`#${btnId} i`);
+        if (!input) return;
+        if (input.type === 'password') {
+          input.type = 'text';
+          if (icon) icon.className = 'fa-solid fa-eye-slash';
+        } else {
+          input.type = 'password';
+          if (icon) icon.className = 'fa-solid fa-eye';
+        }
+      });
+    };
+    setupToggle('togglePasswordBtn', 'authPasswordInput');
+    setupToggle('toggleProfilePassBtn', 'profileNewPasswordInput');
+    setupToggle('toggleRecoveryPassBtn', 'recoveryPasswordInput');
+
+    // Forgot / Reset Password Triggers
+    document.getElementById('openForgotPassBtn')?.addEventListener('click', () => {
+      const currentEmail = document.getElementById('authEmailInput')?.value?.trim() || '';
+      if (currentEmail) {
+        document.getElementById('forgotEmailInput').value = currentEmail;
+      }
+      this.openModal('forgotPassModal');
+    });
+
+    document.getElementById('forgotPassForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('forgotEmailInput').value.trim();
+      const submitBtn = document.getElementById('forgotSubmitBtn');
+      submitBtn.disabled = true;
+      try {
+        const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + window.location.pathname
+        });
+        if (error) throw error;
+        this.showToast('Link de recuperação enviado! Verifique seu e-mail.');
+        this.closeModal('forgotPassModal');
+      } catch (err) {
+        alert(`Erro ao solicitar recuperação: ${err.message}`);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('newPasswordRecoveryForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newPass = document.getElementById('recoveryPasswordInput').value.trim();
+      if (newPass.length < 6) {
+        alert('A senha deve ter pelo menos 6 caracteres.');
+        return;
+      }
+      const submitBtn = document.getElementById('recoverySubmitBtn');
+      submitBtn.disabled = true;
+      try {
+        const { error } = await this.supabase.auth.updateUser({ password: newPass });
+        if (error) throw error;
+        this.sound.playSuccess();
+        this.showToast('Nova senha salva com sucesso no Supabase!');
+        this.closeModal('newPasswordRecoveryModal');
+      } catch (err) {
+        alert(`Erro ao salvar nova senha: ${err.message}`);
+      } finally {
+        submitBtn.disabled = false;
       }
     });
 
@@ -1491,25 +1551,43 @@ class ShonenApp {
       this.ambient.setMode(e.target.value);
     });
 
-    // Profile Form
+    // Profile Form Submit (Nome, Avatar e Senha)
     document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const newName = document.getElementById('profileNameInput').value.trim();
       const selectedAvatar = document.querySelector('input[name="avatarRadio"]:checked')?.value || 'goku';
+      const newPassword = document.getElementById('profileNewPasswordInput')?.value?.trim();
 
       if (newName && this.currentUser && this.supabase) {
-        this.userProfile.name = newName;
-        this.userProfile.avatar = selectedAvatar;
-        this.updateUserStatsDisplay();
+        try {
+          // 1. Atualizar senha se preenchida
+          if (newPassword) {
+            if (newPassword.length < 6) {
+              alert('A nova senha deve possuir pelo menos 6 caracteres.');
+              return;
+            }
+            const { error: passErr } = await this.supabase.auth.updateUser({ password: newPassword });
+            if (passErr) throw passErr;
+            this.showToast('Senha alterada com sucesso!');
+            document.getElementById('profileNewPasswordInput').value = '';
+          }
 
-        await this.supabase
-          .from('profiles')
-          .update({ name: newName, avatar: selectedAvatar, updated_at: new Date().toISOString() })
-          .eq('id', this.currentUser.id);
+          // 2. Atualizar perfil (Nome e Avatar)
+          this.userProfile.name = newName;
+          this.userProfile.avatar = selectedAvatar;
+          this.updateUserStatsDisplay();
 
-        this.sound.playPowerUp();
-        this.showToast('Perfil atualizado no Supabase!');
-        this.closeModal('profileModal');
+          await this.supabase
+            .from('profiles')
+            .update({ name: newName, avatar: selectedAvatar, updated_at: new Date().toISOString() })
+            .eq('id', this.currentUser.id);
+
+          this.sound.playPowerUp();
+          this.showToast('Perfil atualizado no Supabase!');
+          this.closeModal('profileModal');
+        } catch (err) {
+          alert(`Erro ao atualizar perfil/senha: ${err.message}`);
+        }
       }
     });
 

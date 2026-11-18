@@ -9,7 +9,8 @@ Uma aplicação web com estética anime (Dragon Ball, One Piece, Naruto, My Hero
 1. **Página de Login e Cadastro Dedicada**:
    - Tela de acesso com visual anime, alternância entre *Entrar* e *Criar Conta*.
    - Escolha de Avatar inicial (Goku, Luffy, Naruto ou Deku) e nome de guerreiro.
-   - Validações completas e botão para exibir/ocultar senha.
+   - **Opção para ver a senha (ícone de olho 👁️)** em todos os campos.
+   - **Opção para alterar e redefinir a senha** tanto dentro do painel de Perfil quanto na tela de login via e-mail.
 2. **Banco de Dados em Nuvem Seguro (Supabase)**:
    - **Adeus `localStorage` isolado**: agora todos os dados são salvos nas tabelas PostgreSQL do Supabase.
    - **Isolamento por Usuário**: Cada usuário cadastrado possui seus dados salvos separadamente pelo seu `user_id`. Ninguém tem acesso aos dados dos outros graças ao *Row Level Security (RLS)*.
