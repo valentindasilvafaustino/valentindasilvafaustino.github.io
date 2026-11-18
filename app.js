@@ -6,6 +6,10 @@
              Canvas Energy Particles, Web Audio Synth, Pomodoro & Sharing
    =================================================================== */
 
+// CREDENCIAIS PERMANENTES DO SUPABASE (Sempre conectado!)
+const SUPABASE_PROJECT_URL = 'https://prnrtffmodhydrxxqwzt.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_tufnjKA7ky5zLDhAzDyxRg_jrvlZQGM';
+
 // Shonen Quotes Collection
 const SHONEN_QUOTES = [
   { text: "Os limites só existem se você os deixar existir. Supere a si mesmo todos os dias!", author: "Son Goku (Dragon Ball)" },
@@ -382,25 +386,15 @@ class ShonenApp {
 
   // ================= SUPABASE CLIENT INITIALIZATION =================
   async initSupabase() {
-    const config = window.SUPABASE_CONFIG || {};
-    const url = config.url?.trim();
-    const key = config.anonKey?.trim();
+    const url = (window.SUPABASE_CONFIG?.url || SUPABASE_PROJECT_URL).trim();
+    const key = (window.SUPABASE_CONFIG?.anonKey || SUPABASE_PUBLISHABLE_KEY).trim();
 
     const pill = document.getElementById('dbStatusPill');
     const statusText = document.getElementById('dbStatusText');
 
-    if (!url || !key || url.includes('SEU_PROJETO')) {
-      if (pill) {
-        pill.querySelector('.status-dot').className = 'status-dot offline';
-        statusText.textContent = 'Supabase: Chaves Pendentes';
-      }
-      this.showAuthAlert('Atenção: Configure a URL e a Chave Pública do seu Supabase no botão abaixo para conectar à sua base de dados.', 'error');
-      return false;
-    }
-
     try {
       if (!window.supabase) {
-        throw new Error('Biblioteca Supabase SDK não carregou.');
+        throw new Error('Biblioteca Supabase SDK ainda não carregou.');
       }
 
       this.supabase = window.supabase.createClient(url, key);
@@ -412,7 +406,7 @@ class ShonenApp {
 
       if (pill) {
         pill.querySelector('.status-dot').className = 'status-dot online';
-        statusText.textContent = 'Supabase Conectado!';
+        statusText.textContent = 'Supabase Conectado';
       }
 
       // Setup Auth state listener
@@ -1399,30 +1393,6 @@ class ShonenApp {
 
     // Logout
     document.getElementById('logoutBtn')?.addEventListener('click', () => this.logout());
-
-    // Config Supabase Modal
-    document.getElementById('openDbConfigBtn')?.addEventListener('click', () => {
-      const cfg = window.SUPABASE_CONFIG || {};
-      document.getElementById('cfgSupabaseUrl').value = cfg.url || '';
-      document.getElementById('cfgSupabaseAnonKey').value = cfg.anonKey || '';
-      this.openModal('dbConfigModal');
-    });
-
-    document.getElementById('dbConfigForm')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const newUrl = document.getElementById('cfgSupabaseUrl').value.trim();
-      const newKey = document.getElementById('cfgSupabaseAnonKey').value.trim();
-
-      window.SUPABASE_CONFIG.url = newUrl;
-      window.SUPABASE_CONFIG.anonKey = newKey;
-
-      localStorage.setItem('SHONEN_SUPABASE_URL', newUrl);
-      localStorage.setItem('SHONEN_SUPABASE_ANON_KEY', newKey);
-
-      this.closeModal('dbConfigModal');
-      this.showToast('Chaves salvas! Conectando ao Supabase...');
-      await this.initSupabase();
-    });
 
     // General Modal Open Buttons
     document.getElementById('openShareModalBtn')?.addEventListener('click', () => this.openModal('shareModal'));

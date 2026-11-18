@@ -130,14 +130,14 @@
         </button>
       </form>
 
-      <!-- Supabase Connection Status & Key Setup Footer -->
+      <!-- Supabase Connection Status Footer -->
       <div class="auth-footer">
         <div class="db-status-pill" id="dbStatusPill">
-          <span class="status-dot"></span> <span id="dbStatusText">Verificando Supabase...</span>
+          <span class="status-dot online"></span> <span id="dbStatusText">Supabase Conectado</span>
         </div>
-        <button class="config-link-btn" id="openDbConfigBtn">
-          <i class="fa-solid fa-gear"></i> Configurar Chaves Supabase
-        </button>
+        <span class="cloud-shield" style="display: flex; align-items: center; gap: 6px; color: #34d399; font-size: 0.75rem; font-weight: 600;">
+          <i class="fa-solid fa-cloud-check"></i> Nuvem Sempre Ativa
+        </span>
       </div>
 
     </div>
@@ -421,35 +421,6 @@
   </div>
 
   <!-- ==================== MODALS ==================== -->
-
-  <!-- Modal: Configuração do Supabase (URL & Anon Key) -->
-  <div class="modal-backdrop" id="dbConfigModal">
-    <div class="modal-window glass-panel">
-      <div class="modal-header">
-        <h3><i class="fa-solid fa-database"></i> Conexão com o Supabase</h3>
-        <button class="modal-close-btn" data-close-modal="dbConfigModal">&times;</button>
-      </div>
-      <form id="dbConfigForm">
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
-          As credenciais podem ser definidas no seu arquivo <code>.env</code>, <code>supabase-config.js</code> ou coladas abaixo para salvar diretamente no navegador:
-        </p>
-        <div class="form-group">
-          <label for="cfgSupabaseUrl">URL do Projeto Supabase (Project URL)</label>
-          <input type="url" id="cfgSupabaseUrl" placeholder="https://seu-projeto.supabase.co" required>
-        </div>
-        <div class="form-group">
-          <label for="cfgSupabaseAnonKey">Chave Pública Anônima (anon public key)</label>
-          <input type="text" id="cfgSupabaseAnonKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-close-modal="dbConfigModal">Fechar</button>
-          <button type="submit" class="btn btn-primary glow-btn">
-            <i class="fa-solid fa-plug"></i> Salvar e Conectar
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- Modal: Nova / Editar Nota -->
   <div class="modal-backdrop" id="noteModal">
