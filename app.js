@@ -851,7 +851,11 @@ class ShonenApp {
       this.renderNotes();
     } catch (err) {
       console.error(err);
-      this.showToast(`Erro ao salvar nota: ${err.message}`);
+      if (err.message && err.message.includes('schema cache')) {
+        alert("⚠️ As tabelas do banco de dados ainda não foram criadas no Supabase!\n\nPara resolver em 30 segundos:\n1. Abra o painel do Supabase -> SQL Editor\n2. Cole o código do arquivo 'supabase_schema.sql'\n3. Clique no botão 'Run'\n\nSuas tabelas estarão criadas e as notas serão salvas imediatamente!");
+      } else {
+        this.showToast(`Erro ao salvar nota: ${err.message}`);
+      }
     }
   }
 
