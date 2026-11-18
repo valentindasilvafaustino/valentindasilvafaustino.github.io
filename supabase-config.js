@@ -1,7 +1,7 @@
 /* ===================================================================
-   SHONEN STUDY HUB - CONFIGURAÇÃO AUTOMÁTICA DO SUPABASE
+   TINTINGAMEZ - CONFIGURAÇÃO AUTOMÁTICA DA NUVEM
    Estas chaves são públicas (anon/publishable) e permitem a conexão
-   direta e automática tanto localmente quanto no GitHub Pages.
+   direta e automática tanto localmente quanto online.
    =================================================================== */
 
 window.SUPABASE_CONFIG = {

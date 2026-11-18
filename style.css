@@ -1,5 +1,5 @@
 /* ===================================================================
-   SHONEN STUDY HUB - INNOVATIVE STYLESHEET WITH SUPABASE AUTH
+   TINTINGAMEZ - INNOVATIVE STYLESHEET
    Anime Multiverse: Goku (DB), Luffy (OP), Naruto, Deku (MHA)
    Features: Glassmorphism, Neon Auras, Interactive 3D Tilt, Canvas FX,
              Dedicated Auth Screen & Database Status Indicator
@@ -1643,17 +1643,12 @@ html, body {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.github-link {
+.footer-tag {
   color: var(--accent);
-  text-decoration: none;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.github-link:hover {
-  text-decoration: underline;
 }
 
 /* ================= RESPONSIVE ================= */

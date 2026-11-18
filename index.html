@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shonen Study Hub ⚡ Plataforma de Estudos Anime & Supabase</title>
+  <title>TintinGamez ⚡ Plataforma de Estudos Anime</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2224%22>⚡</text></svg>">
   
   <!-- Google Fonts: Orbitron & Inter & Bungee -->
@@ -14,10 +14,10 @@
   <!-- FontAwesome for Anime & Utility Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
-  <!-- Supabase CDN Client Library -->
+  <!-- Database Client Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
-  <!-- Supabase Config Loader -->
+  <!-- Database Config Loader -->
   <script src="supabase-config.js"></script>
 
   <link rel="stylesheet" href="style.css">
@@ -36,7 +36,7 @@
       
       <!-- Anime Universe Switcher on Login Screen -->
       <div class="theme-bar auth-theme-bar">
-        <button class="theme-btn active" data-theme-target="multiverse" title="Multiverso Shonen">
+        <button class="theme-btn active" data-theme-target="multiverse" title="Multiverso Anime">
           <span class="icon">🌌</span>
         </button>
         <button class="theme-btn" data-theme-target="dragonball" title="Dragon Ball - Goku Ki">
@@ -57,8 +57,8 @@
         <div class="logo-badge pulse-icon">
           <i class="fa-solid fa-bolt-lightning"></i>
         </div>
-        <h2 class="auth-title">SHONEN <span class="gradient-text">STUDY HUB</span></h2>
-        <p class="auth-subtitle">Conectado ao Supabase • Salve suas notas, treinos e XP na nuvem</p>
+        <h2 class="auth-title">TINTIN<span class="gradient-text">GAMEZ</span></h2>
+        <p class="auth-subtitle">Plataforma de Estudos & Treino • Salve suas notas, missões e XP na nuvem</p>
       </div>
 
       <!-- Auth Tabs: Login vs Register -->
@@ -111,7 +111,7 @@
         <!-- Email Field -->
         <div class="form-group">
           <label for="authEmailInput"><i class="fa-solid fa-envelope"></i> E-mail de Acesso</label>
-          <input type="email" id="authEmailInput" placeholder="exemplo@shonen.com" required autocomplete="email">
+          <input type="email" id="authEmailInput" placeholder="exemplo@tintingamez.com" required autocomplete="email">
         </div>
 
         <!-- Password Field -->
@@ -131,14 +131,14 @@
         </div>
 
         <button type="submit" class="btn btn-primary glow-btn auth-submit-btn" id="authSubmitBtn">
-          <i class="fa-solid fa-bolt"></i> <span id="authSubmitText">Entrar no Shonen Hub</span>
+          <i class="fa-solid fa-bolt"></i> <span id="authSubmitText">Entrar no TintinGamez</span>
         </button>
       </form>
 
-      <!-- Supabase Connection Status Footer -->
+      <!-- Connection Status Footer -->
       <div class="auth-footer">
         <div class="db-status-pill" id="dbStatusPill">
-          <span class="status-dot online"></span> <span id="dbStatusText">Supabase Conectado</span>
+          <span class="status-dot online"></span> <span id="dbStatusText">Servidor Online</span>
         </div>
         <span class="cloud-shield" style="display: flex; align-items: center; gap: 6px; color: #34d399; font-size: 0.75rem; font-weight: 600;">
           <i class="fa-solid fa-cloud-check"></i> Nuvem Sempre Ativa
@@ -158,14 +158,14 @@
           <i class="fa-solid fa-bolt-lightning pulse-icon"></i>
         </div>
         <div>
-          <h1 class="logo-title">SHONEN <span class="gradient-text">STUDY HUB</span></h1>
-          <p class="logo-sub">Central de Estudos Multiverso • Sincronizado no Supabase</p>
+          <h1 class="logo-title">TINTIN<span class="gradient-text">GAMEZ</span></h1>
+          <p class="logo-sub">Central de Estudos Multiverso • Treine seu Conhecimento</p>
         </div>
       </div>
 
       <!-- Theme Switcher Bar (Anime Universes) -->
       <div class="theme-bar" id="themeBar">
-        <button class="theme-btn active" data-theme-target="multiverse" title="Multiverso Shonen">
+        <button class="theme-btn active" data-theme-target="multiverse" title="Multiverso Anime">
           <span class="icon">🌌</span>
           <span class="label">Multiverso</span>
         </button>
@@ -189,8 +189,8 @@
 
       <!-- User Stats & Actions -->
       <div class="header-actions">
-        <!-- Supabase Cloud Sync Badge -->
-        <div class="cloud-sync-badge" id="cloudSyncBadge" title="Dados salvos no banco Supabase">
+        <!-- Cloud Sync Badge -->
+        <div class="cloud-sync-badge" id="cloudSyncBadge" title="Dados salvos na nuvem com segurança">
           <i class="fa-solid fa-cloud-check"></i> <span>Nuvem Ativa</span>
         </div>
 
@@ -217,7 +217,7 @@
         </div>
 
         <!-- Logout Button -->
-        <button class="btn btn-sm btn-secondary logout-btn" id="logoutBtn" title="Desconectar do Supabase">
+        <button class="btn btn-sm btn-secondary logout-btn" id="logoutBtn" title="Sair da Conta">
           <i class="fa-solid fa-right-from-bracket"></i> Sair
         </button>
       </div>
@@ -227,7 +227,7 @@
     <section class="banner-section glass-panel">
       <div class="banner-content">
         <div class="banner-tag">
-          <i class="fa-solid fa-quote-left"></i> FRASE SHONEN DO DIA
+          <i class="fa-solid fa-quote-left"></i> FRASE DO DIA
         </div>
         <p class="quote-text" id="dailyQuoteText">"Os limites só existem se você os deixar existir. Supere a si mesmo todos os dias!"</p>
         <span class="quote-author" id="dailyQuoteAuthor">— Son Goku (Dragon Ball Super)</span>
@@ -294,9 +294,9 @@
             </select>
           </div>
 
-          <!-- Total Training Sessions Synced to Supabase -->
+          <!-- Total Training Sessions Synced to Cloud -->
           <div class="training-stats-row">
-            <span><i class="fa-solid fa-dumbbell"></i> Treinos no BD: <strong id="trainingCountDisplay">0</strong></span>
+            <span><i class="fa-solid fa-dumbbell"></i> Treinos Registrados: <strong id="trainingCountDisplay">0</strong></span>
           </div>
         </div>
 
@@ -310,7 +310,7 @@
           </div>
 
           <div class="links-list" id="linksListContainer">
-            <!-- Dynamically Rendered from Supabase -->
+            <!-- Dynamically Rendered -->
           </div>
         </div>
 
@@ -322,7 +322,7 @@
           <div class="card-header">
             <div>
               <h3><i class="fa-solid fa-scroll"></i> Grimório de Estudos</h3>
-              <p class="subtitle">Salvo na nuvem no Supabase • Total isolamento por usuário</p>
+              <p class="subtitle">Salvo na nuvem • Total privacidade e isolamento por usuário</p>
             </div>
             <button class="btn btn-primary glow-btn" id="openNewNoteBtn">
               <i class="fa-solid fa-feather-pointed"></i> Nova Nota
@@ -348,7 +348,7 @@
 
           <!-- Notes Cards Container -->
           <div class="notes-grid" id="notesGridContainer">
-            <!-- Dynamically populated notes from Supabase -->
+            <!-- Dynamically populated notes -->
           </div>
         </div>
       </section>
@@ -359,7 +359,7 @@
           <div class="card-header">
             <div>
               <h3><i class="fa-solid fa-khanda"></i> Missões de Treino</h3>
-              <p class="subtitle">Complete tarefas e ganhe XP no banco</p>
+              <p class="subtitle">Complete tarefas e ganhe XP</p>
             </div>
             <button class="btn btn-sm btn-secondary" id="openAddQuestBtn">
               <i class="fa-solid fa-plus"></i> Missão
@@ -368,7 +368,7 @@
 
           <!-- Quick Add Task -->
           <form class="quick-add-task-form" id="quickTaskForm">
-            <input type="text" id="quickTaskInput" placeholder="Nova missão (Ex: Estudar Banco de Dados)..." required>
+            <input type="text" id="quickTaskInput" placeholder="Nova missão (Ex: Estudar Programação)..." required>
             <select id="quickTaskDifficulty" class="styled-select">
               <option value="D">Rank D (+50 XP)</option>
               <option value="C" selected>Rank C (+100 XP)</option>
@@ -389,7 +389,7 @@
 
           <!-- Tasks List Container -->
           <div class="tasks-list" id="tasksListContainer">
-            <!-- Dynamically populated tasks from Supabase -->
+            <!-- Dynamically populated tasks -->
           </div>
         </div>
 
@@ -413,13 +413,13 @@
     <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-left">
-        <span>⚡ <strong>Shonen Study Hub</strong> • Powered by <strong>Supabase Cloud Database</strong></span>
+        <span>⚡ <strong>TintinGamez</strong> • Plataforma de Estudos Anime</span>
       </div>
       <div class="footer-center">
         <span id="userEmailBadgeFooter">Autenticado com sucesso</span>
       </div>
       <div class="footer-right">
-        <a href="https://github.com/valentindasilvafaustino/valentindasilvafaustino.github.io" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> Meu Repositório GitHub</a>
+        <span class="footer-tag"><i class="fa-solid fa-gamepad"></i> TintinGamez Hub</span>
       </div>
     </footer>
 
@@ -464,7 +464,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal="noteModal">Cancelar</button>
           <button type="submit" class="btn btn-primary glow-btn">
-            <i class="fa-solid fa-cloud-arrow-up"></i> Salvar no Supabase (+150 XP)
+            <i class="fa-solid fa-cloud-arrow-up"></i> Salvar Nota (+150 XP)
           </button>
         </div>
       </form>
@@ -481,11 +481,11 @@
       <form id="linkForm">
         <div class="form-group">
           <label for="linkTitleInput">Nome do Recurso</label>
-          <input type="text" id="linkTitleInput" placeholder="Ex: Documentação Supabase Auth" required>
+          <input type="text" id="linkTitleInput" placeholder="Ex: Documentação MDN Web Docs" required>
         </div>
         <div class="form-group">
           <label for="linkUrlInput">URL / Link</label>
-          <input type="url" id="linkUrlInput" placeholder="https://supabase.com/docs" required>
+          <input type="url" id="linkUrlInput" placeholder="https://developer.mozilla.org" required>
         </div>
         <div class="form-group">
           <label for="linkCategorySelect">Categoria</label>
@@ -498,7 +498,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal="linkModal">Cancelar</button>
-          <button type="submit" class="btn btn-primary glow-btn"><i class="fa-solid fa-plus"></i> Guardar no Banco</button>
+          <button type="submit" class="btn btn-primary glow-btn"><i class="fa-solid fa-plus"></i> Guardar Recurso</button>
         </div>
       </form>
     </div>
@@ -550,12 +550,12 @@
           </div>
         </div>
 
-        <!-- Option 3: Supabase SQL Setup Reminder -->
+        <!-- Option 3: Cloud Storage Info -->
         <div class="share-card">
-          <div class="share-icon-wrap"><i class="fa-solid fa-database"></i></div>
+          <div class="share-icon-wrap"><i class="fa-solid fa-cloud"></i></div>
           <div class="share-info">
-            <h4>3. Banco de Dados Supabase</h4>
-            <p>Certifique-se de executar o script <code>supabase_schema.sql</code> no seu editor SQL do Supabase para criar as tabelas com segurança Row Level Security (RLS).</p>
+            <h4>3. Armazenamento na Nuvem</h4>
+            <p>Seus dados estão protegidos e sincronizados com a nuvem em tempo real com total privacidade e isolamento por conta.</p>
           </div>
         </div>
 
@@ -579,7 +579,7 @@
           <input type="text" id="profileNameInput" required placeholder="Ex: Guerreiro Z / Ninja Estudante">
         </div>
         <div class="form-group">
-          <label>Escolha seu Avatar Shonen</label>
+          <label>Escolha seu Avatar</label>
           <div class="avatar-selector-grid">
             <label class="avatar-option">
               <input type="radio" name="avatarRadio" value="goku">
@@ -638,11 +638,11 @@
       </div>
       <form id="forgotPassForm">
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
-          Informe o e-mail cadastrado na sua conta Shonen. Enviaremos um link de acesso seguro pelo Supabase para você definir uma nova senha:
+          Informe o e-mail cadastrado na sua conta. Enviaremos um link de acesso seguro para você definir uma nova senha:
         </p>
         <div class="form-group">
           <label for="forgotEmailInput"><i class="fa-solid fa-envelope"></i> Seu E-mail Cadastrado</label>
-          <input type="email" id="forgotEmailInput" required placeholder="seu-email@shonen.com">
+          <input type="email" id="forgotEmailInput" required placeholder="seu-email@tintingamez.com">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal="forgotPassModal">Cancelar</button>
@@ -663,7 +663,7 @@
       </div>
       <form id="newPasswordRecoveryForm">
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-          Digite sua nova senha abaixo para atualizar sua conta no Supabase:
+          Digite sua nova senha abaixo para atualizar sua conta:
         </p>
         <div class="form-group">
           <label for="recoveryPasswordInput">Nova Senha</label>

@@ -1,5 +1,5 @@
 /* ===================================================================
-   SHONEN STUDY HUB - APP LOGIC & SUPABASE DATABASE ENGINE
+   TINTINGAMEZ - APP LOGIC & DATABASE ENGINE
    Themes: Dragon Ball, One Piece, Naruto, My Hero Academia, Multiverse
    Features: Supabase Auth (Login/Cadastro), Supabase DB Sync (Notas,
              Missões, Treinos, Links, XP isolados por usuário),
@@ -406,7 +406,7 @@ class ShonenApp {
 
       if (pill) {
         pill.querySelector('.status-dot').className = 'status-dot online';
-        statusText.textContent = 'Supabase Conectado';
+        statusText.textContent = 'Servidor Online';
       }
 
       // Setup Auth state listener
@@ -435,12 +435,12 @@ class ShonenApp {
 
       return true;
     } catch (err) {
-      console.error('Supabase init error:', err);
+      console.error('Connection error:', err);
       if (pill) {
         pill.querySelector('.status-dot').className = 'status-dot offline';
-        statusText.textContent = 'Erro ao conectar ao Supabase';
+        statusText.textContent = 'Erro de Conexão com o Servidor';
       }
-      this.showAuthAlert(`Erro na conexão com o Supabase: ${err.message}`, 'error');
+      this.showAuthAlert(`Erro na conexão com o servidor: ${err.message}`, 'error');
       return false;
     }
   }
@@ -476,7 +476,7 @@ class ShonenApp {
       regTab.classList.remove('active');
       nameGroup.style.display = 'none';
       avatarGroup.style.display = 'none';
-      submitText.textContent = 'Entrar no Shonen Hub';
+      submitText.textContent = 'Entrar no TintinGamez';
     } else {
       regTab.classList.add('active');
       loginTab.classList.remove('active');
@@ -498,8 +498,7 @@ class ShonenApp {
   async handleAuthSubmit(e) {
     e.preventDefault();
     if (!this.supabase) {
-      this.openModal('dbConfigModal');
-      this.showAuthAlert('Configure a URL e a Anon Key do Supabase antes de fazer login.', 'error');
+      this.showAuthAlert('Erro: Servidor indisponível no momento.', 'error');
       return;
     }
 
@@ -535,7 +534,7 @@ class ShonenApp {
         if (error) throw error;
 
         this.sound.playSuccess();
-        this.showAuthAlert('Conta criada com sucesso! Se a confirmação de e-mail estiver ativa no Supabase, verifique sua caixa de entrada, ou faça login.', 'success');
+        this.showAuthAlert('Conta criada com sucesso! Verifique seu e-mail se necessário, ou faça login.', 'success');
       }
     } catch (err) {
       console.error(err);
@@ -632,10 +631,10 @@ class ShonenApp {
       const countEl = document.getElementById('trainingCountDisplay');
       if (countEl) countEl.textContent = this.trainingsCount;
 
-      this.showToast(`🔥 Dados de ${this.userProfile.name} sincronizados do Supabase!`);
+      this.showToast(`🔥 Bem-vindo ao TintinGamez, ${this.userProfile.name}!`);
     } catch (err) {
-      console.error('Error loading data from Supabase:', err);
-      this.showToast('Aviso: Verifique se executou o script supabase_schema.sql no Supabase.');
+      console.error('Error loading data:', err);
+      this.showToast('Aviso: Verifique sua conexão com o servidor.');
     }
   }
 
@@ -829,7 +828,7 @@ class ShonenApp {
         if (idx !== -1) {
           this.notes[idx] = { ...this.notes[idx], title, subject, tags, body };
         }
-        this.showToast('Nota atualizada no Supabase!');
+        this.showToast('Nota atualizada com sucesso!');
       } else {
         const newNote = {
           id: 'note-' + Date.now(),
@@ -872,7 +871,7 @@ class ShonenApp {
 
   async deleteNote(id) {
     if (!this.currentUser || !this.supabase) return;
-    if (confirm('Deseja realmente apagar esta anotação do seu banco Supabase?')) {
+    if (confirm('Deseja realmente apagar esta anotação?')) {
       try {
         const { error } = await this.supabase
           .from('notes')
@@ -959,7 +958,7 @@ class ShonenApp {
       this.tasks.unshift(newTask);
       this.renderTasks();
       this.sound.playClick();
-      this.showToast(`Missão Rank ${difficulty} salva no Supabase!`);
+      this.showToast(`Missão Rank ${difficulty} salva com sucesso!`);
     } catch (err) {
       this.showToast(`Erro ao criar tarefa: ${err.message}`);
     }
@@ -1139,7 +1138,7 @@ class ShonenApp {
           // Register training session in Supabase!
           await this.recordTrainingSession();
           await this.addXp(120, 'Ciclo da Sala do Tempo Concluído!');
-          alert('⚡ Parabéns guerreiro! Seu tempo de treino terminou e foi salvo no Supabase!');
+          alert('⚡ Parabéns guerreiro! Seu tempo de treino terminou e foi salvo com sucesso!');
         } else {
           alert('🔔 Descanso finalizado! Pronto para o próximo round de estudos?');
         }
@@ -1199,9 +1198,9 @@ class ShonenApp {
     if (timerTimeEl) timerTimeEl.textContent = formatted;
 
     if (this.timerIsRunning) {
-      document.title = `(${formatted}) ⚡ Shonen Study Hub`;
+      document.title = `(${formatted}) ⚡ TintinGamez`;
     } else {
-      document.title = 'Shonen Study Hub ⚡ Plataforma de Estudos Anime';
+      document.title = 'TintinGamez ⚡ Plataforma de Estudos Anime';
     }
 
     const circle = document.getElementById('timerCircleProgress');
@@ -1252,7 +1251,7 @@ class ShonenApp {
         if (sharedData && (sharedData.notes || sharedData.links)) {
           setTimeout(async () => {
             const confirmImport = confirm(
-              `⚡ Seu amigo (${sharedData.creator || 'Um Guerreiro'}) compartilhou um pacote de estudos com ${sharedData.notes?.length || 0} anotações e ${sharedData.links?.length || 0} recursos!\n\nDeseja importar esse conteúdo para a sua conta Supabase agora?`
+              `⚡ Seu amigo (${sharedData.creator || 'Um Guerreiro'}) compartilhou um pacote de estudos com ${sharedData.notes?.length || 0} anotações e ${sharedData.links?.length || 0} recursos!\n\nDeseja importar esse conteúdo para a sua conta agora?`
             );
             if (confirmImport && this.currentUser && this.supabase) {
               for (let n of (sharedData.notes || [])) {
@@ -1282,7 +1281,7 @@ class ShonenApp {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullBackup, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `shonen-study-supabase-backup-${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute("download", `tintingamez-backup-${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -1307,7 +1306,7 @@ class ShonenApp {
             }
           }
           this.sound.playSuccess();
-          this.showToast('Dados do arquivo importados para o Supabase com sucesso!');
+          this.showToast('Dados do arquivo importados com sucesso!');
           this.closeModal('shareModal');
         }
       } catch (err) {
@@ -1442,7 +1441,7 @@ class ShonenApp {
         const { error } = await this.supabase.auth.updateUser({ password: newPass });
         if (error) throw error;
         this.sound.playSuccess();
-        this.showToast('Nova senha salva com sucesso no Supabase!');
+        this.showToast('Nova senha salva com sucesso!');
         this.closeModal('newPasswordRecoveryModal');
       } catch (err) {
         alert(`Erro ao salvar nova senha: ${err.message}`);
@@ -1583,7 +1582,7 @@ class ShonenApp {
             .eq('id', this.currentUser.id);
 
           this.sound.playPowerUp();
-          this.showToast('Perfil atualizado no Supabase!');
+          this.showToast('Perfil atualizado com sucesso!');
           this.closeModal('profileModal');
         } catch (err) {
           alert(`Erro ao atualizar perfil/senha: ${err.message}`);
